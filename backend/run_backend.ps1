@@ -13,7 +13,7 @@ Write-Host "Activating virtual environment..."
 try {
     Write-Host "Environment activated. Starting FastAPI..."
     # Run FastAPI; keep it running until you press Ctrl +C
-    python -m uvicorn main:app --reload --port 8000
+    python -m uvicorn app.main:app --reload --port 8000
 }
 finally {
     Write-Host ""

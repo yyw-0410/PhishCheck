@@ -1,17 +1,5 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+"""Compatibility module that exposes the FastAPI app instance to uvicorn."""
 
-app = FastAPI()
+from app.main import app
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-@app.get("/")
-def index():
-    return {"message": "Backend running successfully!"}
-
+__all__ = ["app"]
