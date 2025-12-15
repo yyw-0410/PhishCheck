@@ -20,7 +20,9 @@ PhishCheck/
 │   │   │   │   ├── link.py           # POST /api/v1/analysis/link  
 │   │   │   │   ├── file.py           # POST /api/v1/analysis/file
 │   │   │   │   ├── ai_agent.py       # POST /api/v1/ai (AI chat)
-│   │   │   │   └── auth.py           # Auth endpoints (login, register, OAuth)
+│   │   │   │   ├── auth.py           # Auth endpoints (login, register, OAuth)
+│   │   │   │   ├── health.py         # GET /api/v1/health (health check)
+│   │   │   │   └── utils.py          # Utility endpoints
 │   │   │   ├── __init__.py
 │   │   │   └── routes.py             # Router aggregation
 │   │   │
@@ -53,7 +55,7 @@ PhishCheck/
 │   │   │
 │   │   ├── models/                   # Database Models (SQLAlchemy)
 │   │   │   ├── __init__.py
-│   │   │   └── user.py               # User, Session, GuestRateLimit tables
+│   │   │   └── user.py               # User, Session, OAuthState, GuestRateLimit models
 │   │   │
 │   │   ├── schemas/                  # Pydantic Schemas (validation)
 │   │   │   ├── __init__.py
@@ -102,16 +104,6 @@ PhishCheck/
 │
 ├── frontend/                         # Vue 3 + TypeScript Frontend
 │   ├── src/
-│   │   ├── views/                    # Page Components
-│   │   │   ├── AnalysisView.vue      # Email analysis (main page)
-│   │   │   ├── LinkAnalysisView.vue  # Link analysis
-│   │   │   ├── FileAnalysisView.vue  # File hash analysis
-│   │   │   ├── ChatView.vue          # AI chat assistant
-│   │   │   ├── LoginView.vue         # Login page
-│   │   │   ├── SignupView.vue        # Signup page
-│   │   │   ├── AccountView.vue       # User account settings
-│   │   │   ├── EmailVerificationView.vue # Email verification
-│   │   │   ├── OAuthCallback.vue     # OAuth callback handler
 │   │   │   ├── NotificationsView.vue # Notifications
 │   │   │   ├── BillingView.vue       # Future: billing
 │   │   │   ├── FeedbackView.vue      # Feedback form
@@ -254,6 +246,8 @@ PhishCheck/
 | `file.py` | `POST /api/v1/analysis/file` | Analyze file hash |
 | `ai_agent.py` | `POST /api/v1/ai` | AI chat assistant |
 | `auth.py` | `/login`, `/register`, `/oauth/*` | Authentication |
+| `health.py` | `GET /api/v1/health` | Health check endpoint |
+| `utils.py` | Various utility endpoints | Helper functions |
 | `dependencies.py` | - | Auth context, rate limit checks |
 
 ### Frontend Key Components
