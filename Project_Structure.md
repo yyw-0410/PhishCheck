@@ -47,6 +47,7 @@ PhishCheck/
 │   │   │   ├── threat_intel.py       # Threat intel orchestration
 │   │   │   └── providers/            # External API Clients
 │   │   │       ├── __init__.py
+│   │   │       ├── base.py           # Base provider class
 │   │   │       ├── virustotal.py     # VirusTotal API
 │   │   │       ├── urlscan.py        # URLscan.io API
 │   │   │       ├── sublime.py        # Sublime Security MDM API
@@ -260,7 +261,7 @@ PhishCheck/
 | `ChatView.vue` | AI chat assistant interface |
 | `LoginView.vue` | Login page with OAuth buttons |
 | `SignupView.vue` | Registration with email verification |
-| `AppSidebar.vue` | Sidebar navigation component |
+| `layout/AppSidebar.vue` | Sidebar navigation component (in layout/) |
 
 ### Frontend Stores (Pinia)
 
