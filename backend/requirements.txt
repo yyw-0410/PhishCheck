@@ -4,3 +4,13 @@ python-dotenv
 httpx[http2]
 cryptography
 python-multipart
+nh3
+sublime-cli
+sqlalchemy
+bcrypt
+pydantic[email]
+slowapi
+dnspython
+pyzbar
+pillow
+pytest
