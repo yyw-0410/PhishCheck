@@ -280,7 +280,16 @@ PhishCheck/
 | `ChatView.vue` | AI chat assistant interface |
 | `LoginView.vue` | Login page with OAuth buttons |
 | `SignupView.vue` | Registration with email verification |
-| `layout/AppSidebar.vue` | Sidebar navigation component (in layout/) |
+| `AccountView.vue` | User account settings |
+| `EmailVerificationView.vue` | Email verification page |
+| `auth/LoginForm.vue` | Email/password login form |
+| `auth/SignupForm.vue` | Registration form with validation |
+| `auth/VerificationBanner.vue` | Email verification reminder banner |
+| `chat/AIChatWidget.vue` | AI chat widget component |
+| `layout/AppSidebar.vue` | Main sidebar navigation |
+| `layout/FloatingActions.vue` | Floating action buttons |
+| `layout/NavMain.vue` | Main navigation component |
+| `layout/TopBar.vue` | Top navigation bar |
 
 ### Frontend Stores (Pinia)
 
