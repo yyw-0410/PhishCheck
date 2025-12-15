@@ -1,120 +1,431 @@
-# PhishCheck - Project Structure
+# PhishCheck - Detailed Project Structure
 
-## Overview
-Full-stack phishing detection platform with FastAPI backend and Vue 3 frontend.
-
----
-
-## Backend (`/backend/app`)
-
-```
-app/
-├── api/                    # API Layer
-│   ├── routers/
-│   │   ├── email.py        # POST /api/v1/analysis/email
-│   │   ├── link.py         # POST /api/v1/analysis/link
-│   │   ├── file.py         # POST /api/v1/analysis/file
-│   │   ├── ai_agent.py     # POST /api/v1/ai
-│   │   ├── auth.py         # Login, register, OAuth
-│   │   └── dependencies.py # AnalysisContext, auth checks
-│   └── routes.py           # Router aggregation
-│
-├── core/                   # Core Config
-│   ├── config.py           # Environment settings
-│   ├── database.py         # SQLite init
-│   ├── logging.py          # Structured logging
-│   └── rate_limit.py       # SlowAPI limiter
-│
-├── services/               # Business Logic
-│   ├── analysis_pipeline.py # Email analysis orchestration
-│   ├── auth_service.py      # Auth + rate limits
-│   ├── email_parser.py      # EML parsing
-│   ├── threat_intel.py      # Threat intel orchestration
-│   ├── rag_service.py       # AI chat service
-│   └── providers/           # External API clients
-│       ├── virustotal.py
-│       ├── urlscan.py
-│       ├── sublime.py
-│       └── ipqs.py
-│
-├── schemas/                # Pydantic Models
-│   ├── email.py            # Email parsing schemas
-│   ├── threat_intel.py     # VT, URLscan responses
-│   └── chat.py             # AI chat schemas
-│
-└── main.py                 # FastAPI app factory
-```
+**Type**: Full-Stack Phishing Detection Platform  
+**Backend**: FastAPI (Python 3.11+)  
+**Frontend**: Vue 3 + TypeScript + Tailwind CSS
 
 ---
 
-## Frontend (`/frontend/src`)
+## 📁 Complete Directory Structure
 
 ```
-src/
-├── views/                  # Page Components
-│   ├── AnalysisView.vue    # Email analysis
-│   ├── LinkAnalysisView.vue
-│   ├── FileAnalysisView.vue
-│   ├── LoginView.vue
-│   └── AIChatView.vue
+PhishCheck/
+├── backend/                          # Python FastAPI Backend
+│   ├── app/
+│   │   ├── api/                      # API Layer
+│   │   │   ├── routers/              # API Endpoints
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── dependencies.py   # Auth context, rate limit checks
+│   │   │   │   ├── email.py          # POST /api/v1/analysis/email
+│   │   │   │   ├── link.py           # POST /api/v1/analysis/link  
+│   │   │   │   ├── file.py           # POST /api/v1/analysis/file
+│   │   │   │   ├── ai_agent.py       # POST /api/v1/ai (AI chat)
+│   │   │   │   └── auth.py           # Auth endpoints (login, register, OAuth)
+│   │   │   ├── __init__.py
+│   │   │   └── routes.py             # Router aggregation
+│   │   │
+│   │   ├── core/                     # Core Configuration
+│   │   │   ├── __init__.py
+│   │   │   ├── config.py             # Environment settings (Settings class)
+│   │   │   ├── constants.py          # ✨ Centralized constants (NEW)
+│   │   │   ├── database.py           # SQLite initialization
+│   │   │   ├── logging.py            # Structured logging (JSON/colored)
+│   │   │   ├── rate_limit.py         # SlowAPI rate limiter
+│   │   │   └── security_headers.py   # ✨ OWASP security headers (NEW)
+│   │   │
+│   │   ├── services/                 # Business Logic Layer
+│   │   │   ├── __init__.py
+│   │   │   ├── analysis_pipeline.py  # Email analysis orchestration
+│   │   │   ├── auth_service.py       # Auth + session + rate limits
+│   │   │   ├── email_parser.py       # EML file parsing (headers, body, attachments)
+│   │   │   ├── email_service.py      # Email verification (Resend API)
+│   │   │   ├── oauth_service.py      # OAuth flow (Google, Microsoft)
+│   │   │   ├── qr_scanner.py         # QR code detection in images
+│   │   │   ├── rag_service.py        # AI chat with RAG (Gemini)
+│   │   │   ├── threat_intel.py       # Threat intel orchestration
+│   │   │   └── providers/            # External API Clients
+│   │   │       ├── __init__.py
+│   │   │       ├── virustotal.py     # VirusTotal API
+│   │   │       ├── urlscan.py        # URLscan.io API
+│   │   │       ├── sublime.py        # Sublime Security MDM API
+│   │   │       ├── ipqs.py           # IP Quality Score API
+│   │   │       └── hybrid_analysis.py # Hybrid Analysis (sandbox)
+│   │   │
+│   │   ├── models/                   # Database Models (SQLAlchemy)
+│   │   │   ├── __init__.py
+│   │   │   └── user.py               # User, Session, GuestRateLimit tables
+│   │   │
+│   │   ├── schemas/                  # Pydantic Schemas (validation)
+│   │   │   ├── __init__.py
+│   │   │   ├── analysis.py           # CombinedAnalysisResult
+│   │   │   ├── attachment_analysis.py # Attachment schemas
+│   │   │   ├── auth.py               # UserLogin, UserRegister, AuthResponse
+│   │   │   ├── chat.py               # ChatRequest, ChatResponse
+│   │   │   ├── email.py              # ParsedEmail, EmailHeader, EmailBody
+│   │   │   ├── link_analysis.py      # LinkAnalysisResult
+│   │   │   ├── mdm.py                # Sublime MDM schemas
+│   │   │   └── threat_intel.py       # ThreatIntelReport, VT/URLscan schemas
+│   │   │
+│   │   ├── utils/                    # Utility Functions
+│   │   │   ├── __init__.py
+│   │   │   ├── crypto.py             # Token encryption/decryption
+│   │   │   └── datetime.py           # Timezone utilities
+│   │   │
+│   │   ├── knowledge/                # RAG Knowledge Base
+│   │   │   ├── email_analysis.md     # Email analysis guide
+│   │   │   ├── file_analysis.md      # File analysis guide
+│   │   │   ├── link_analysis.md      # Link analysis guide
+│   │   │   ├── privacy_summary.md    # Privacy policy summary
+│   │   │   ├── terms_summary.md      # Terms of service summary
+│   │   │   └── user_guide.md         # User guide
+│   │   │
+│   │   └── main.py                   # FastAPI application factory
+│   │
+│   ├── tests/                        # Backend Tests (pytest)
+│   │   ├── __init__.py
+│   │   ├── test_app.py               # Basic app tests
+│   │   ├── test_auth_service.py      # Auth service tests
+│   │   ├── test_email_parser.py      # Email parsing tests
+│   │   ├── test_sublime_client.py    # Sublime API tests
+│   │   └── test_sublime_mdm.py       # Sublime MDM schema tests
+│   │
+│   ├── scripts/                      # Utility Scripts
+│   │   ├── cleanup.py                # Cleanup old sessions/unverified users
+│   │   ├── run_sublime.py            # Test Sublime API
+│   │   ├── filter_sublime_hits.py    # Parse Sublime responses
+│   │   └── api_test.py               # API testing
+│   │
+│   ├── .env.example                  # Environment variables template
+│   ├── requirements.txt              # Python dependencies
+│   ├── phishcheck.db                 # SQLite database
+│   └── phishcheck.erd                # Database ERD
 │
-├── components/             # Reusable UI
-│   ├── ui/                 # Shadcn components
-│   └── chat/               # AI widget
+├── frontend/                         # Vue 3 + TypeScript Frontend
+│   ├── src/
+│   │   ├── views/                    # Page Components
+│   │   │   ├── AnalysisView.vue      # Email analysis (main page)
+│   │   │   ├── LinkAnalysisView.vue  # Link analysis
+│   │   │   ├── FileAnalysisView.vue  # File hash analysis
+│   │   │   ├── ChatView.vue          # AI chat assistant
+│   │   │   ├── LoginView.vue         # Login page
+│   │   │   ├── SignupView.vue        # Signup page
+│   │   │   ├── AccountView.vue       # User account settings
+│   │   │   ├── EmailVerificationView.vue # Email verification
+│   │   │   ├── OAuthCallback.vue     # OAuth callback handler
+│   │   │   ├── NotificationsView.vue # Notifications
+│   │   │   ├── BillingView.vue       # Future: billing
+│   │   │   ├── FeedbackView.vue      # Feedback form
+│   │   │   ├── SupportView.vue       # Support/help center
+│   │   │   ├── PrivacyPolicyView.vue # Privacy policy
+│   │   │   ├── TermsOfServiceView.vue # Terms of service
+│   │   │   └── NotFound.vue          # 404 page
+│   │   │
+│   │   ├── components/               # Reusable Components
+│   │   │   ├── auth/                 # Auth Components
+│   │   │   │   ├── LoginForm.vue
+│   │   │   │   ├── SignupForm.vue
+│   │   │   │   └── OAuthButtons.vue
+│   │   │   │
+│   │   │   ├── chat/                 # AI Chat Components
+│   │   │   │   ├── ChatMessage.vue
+│   │   │   │   └── ChatInput.vue
+│   │   │   │
+│   │   │   ├── layout/               # Layout Components
+│   │   │   │   ├── Header.vue
+│   │   │   │   └── AppSidebar.vue
+│   │   │   │
+│   │   │   ├── icons/                # Custom Icons
+│   │   │   │   ├── IconGoogle.vue
+│   │   │   │   └── IconMicrosoft.vue
+│   │   │   │
+│   │   │   └── ui/                   # Shadcn/vue Components
+│   │   │       ├── avatar/
+│   │   │       ├── badge/
+│   │   │       ├── button/
+│   │   │       ├── card/
+│   │   │       ├── dialog/
+│   │   │       ├── dropdown-menu/
+│   │   │       ├── input/
+│   │   │       ├── label/
+│   │   │       ├── separator/
+│   │   │       ├── sheet/
+│   │   │       ├── sidebar/
+│   │   │       ├── skeleton/
+│   │   │       ├── switch/
+│   │   │       ├── tooltip/
+│   │   │       └── ... (20+ more)
+│   │   │
+│   │   ├── stores/                   # Pinia State Management
+│   │   │   ├── analysis.ts           # Analysis state (results, loading)
+│   │   │   ├── auth.ts               # Auth state (user, session)
+│   │   │   ├── chat.ts               # AI chat state
+│   │   │   ├── api.ts                # API client state
+│   │   │   └── sidebar.ts            # Sidebar state
+│   │   │
+│   │   ├── hooks/                    # Vue Composables
+│   │   │   ├── useAnalysisState.ts   # Analysis state management
+│   │   │   ├── useThreatIntel.ts     # Threat intel data parsing
+│   │   │   ├── useParsedEmail.ts     # Email parsing utilities
+│   │   │   ├── useSublimeInsights.ts # Sublime insights parsing
+│   │   │   └── useViewport.ts        # Responsive utilities
+│   │   │
+│   │   ├── services/                 # API Layer
+│   │   │   └── api.ts                # Axios API client
+│   │   │
+│   │   ├── types/                    # TypeScript Types
+│   │   │   └── analysis.ts           # Analysis result types
+│   │   │
+│   │   ├── utils/                    # Utility Functions
+│   │   │   └── screenshotUtils.ts    # Screenshot utilities
+│   │   │
+│   │   ├── lib/                      # Library Functions
+│   │   │   └── utils.ts              # cn() utility for Tailwind
+│   │   │
+│   │   ├── assets/                   # Static Assets
+│   │   │   ├── base.css              # Base styles
+│   │   │   ├── main.css              # Main styles + Tailwind
+│   │   │   └── logo.svg              # Logo
+│   │   │
+│   │   ├── router/                   # Vue Router
+│   │   │   └── index.ts              # Route definitions + guards
+│   │   │
+│   │   ├── App.vue                   # Root component
+│   │   └── main.ts                   # App entry point
+│   │
+│   ├── public/                       # Public Assets
+│   │   └── FullLogo_Transparent_NoBuffer.ico # Favicon
+│   │
+│   ├── e2e/                          # E2E Tests (Playwright)
+│   │   └── vue.spec.ts
+│   │
+│   ├── components.json               # Shadcn config
+│   ├── env.d.ts                      # Environment types
+│   ├── index.html                    # HTML entry
+│   ├── package.json                  # Node dependencies
+│   ├── package-lock.json             # Locked dependencies
+│   ├── tailwind.config.ts            # Tailwind configuration
+│   ├── tsconfig.json                 # TypeScript config
+│   ├── tsconfig.app.json             # App TypeScript config
+│   ├── vite.config.ts                # Vite configuration
+│   └── vitest.config.ts              # Vitest config (unit tests)
 │
-├── stores/                 # Pinia State
-│   ├── analysis.ts
-│   ├── auth.ts
-│   └── chat.ts
-│
-├── hooks/                  # Composables
-│   ├── useAnalysisState.ts
-│   └── useThreatIntel.ts
-│
-└── services/
-    └── api.ts              # API client
+├── Project_Structure.md              # This file
+├── README.md                         # Project README
+├── schema.sql                        # Database schema SQL
+└── start.bat                         # Quick start script
+
 ```
 
 ---
 
-## API Endpoints
+## 🔑 Key Files Explained
 
-### Analysis (`/api/v1/analysis/`)
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/email` | POST | Analyze .eml file |
-| `/link` | POST | Analyze URL |
-| `/file` | POST | Analyze file hash |
-| `/urlscan/{id}` | GET | Refresh scan |
+### Backend Core Files
 
-### AI (`/api/v1/ai/`)
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/` | POST | Chat with AI |
-| `/suggestions` | GET | Get suggestions |
+| File | Purpose |
+|------|---------|
+| `main.py` | FastAPI app factory, middleware setup, exception handlers |
+| `config.py` | Loads environment variables, validates settings |
+| `constants.py` | ✨ Centralized constants (file sizes, limits, timeouts) |
+| `security_headers.py` | ✨ OWASP security headers middleware |
+| `database.py` | SQLite initialization, table creation |
+| `logging.py` | Structured logging (JSON in prod, colored in dev) |
+| `rate_limit.py` | SlowAPI configuration for rate limiting |
 
----
-
-## External Integrations
+### Backend Services
 
 | Service | Purpose |
 |---------|---------|
-| Sublime Security | Email analysis, ML link detection |
-| VirusTotal | URL/domain/file reputation |
-| URLscan.io | URL scanning + screenshots |
-| IPQS | IP reputation |
-| Hybrid Analysis | Sandbox file analysis |
-| Google Gemini | AI chat assistant |
+| `analysis_pipeline.py` | Orchestrates email analysis (parsing→Sublime→threat intel) |
+| `auth_service.py` | Authentication, sessions, rate limits, OAuth |
+| `email_parser.py` | Parses .eml files (headers, body, attachments, MIME) |
+| `email_service.py` | Sends verification emails via Resend API |
+| `oauth_service.py` | OAuth flows for Google and Microsoft |
+| `threat_intel.py` | Orchestrates VirusTotal, URLscan, IPQS lookups |
+| `rag_service.py` | AI chat with RAG using Google Gemini |
+| `qr_scanner.py` | Detects QR codes in email images |
+
+### Backend API Routers
+
+| Router | Endpoints | Purpose |
+|--------|-----------|---------|
+| `email.py` | `POST /api/v1/analysis/email` | Analyze .eml file |
+| `link.py` | `POST /api/v1/analysis/link` | Analyze URL |
+| `file.py` | `POST /api/v1/analysis/file` | Analyze file hash |
+| `ai_agent.py` | `POST /api/v1/ai` | AI chat assistant |
+| `auth.py` | `/login`, `/register`, `/oauth/*` | Authentication |
+| `dependencies.py` | - | Auth context, rate limit checks |
+
+### Frontend Key Components
+
+| Component | Purpose |
+|-----------|---------|
+| `AnalysisView.vue` | Main email analysis page (file upload, results) |
+| `LinkAnalysisView.vue` | URL analysis page |
+| `FileAnalysisView.vue` | File hash analysis page |
+| `ChatView.vue` | AI chat assistant interface |
+| `LoginView.vue` | Login page with OAuth buttons |
+| `SignupView.vue` | Registration with email verification |
+| `AppSidebar.vue` | Sidebar navigation component |
+
+### Frontend Stores (Pinia)
+
+| Store | Purpose |
+|-------|---------|
+| `analysis.ts` | Analysis results, loading state, file data |
+| `auth.ts` | User session, login/logout, profile |
+| `chat.ts` | AI chat messages, streaming responses |
+| `api.ts` | API client configuration |
+| `sidebar.ts` | Sidebar open/close state |
 
 ---
 
-## Key Patterns
+## 🌐 API Endpoints
 
-- **API Versioning**: `/api/v1/` prefix
-- **Dependency Injection**: `AnalysisContext` for auth + rate limits
-- **Structured Logging**: JSON (prod) / Colored (dev)
-- **Request Tracing**: `X-Request-ID` header
+### Analysis APIs
+
+```
+POST   /api/v1/analysis/email      - Analyze .eml file
+POST   /api/v1/analysis/link       - Analyze URL
+POST   /api/v1/analysis/file       - Analyze file hash
+GET    /api/v1/analysis/urlscan/{id} - Refresh URLscan result
+```
+
+### Authentication APIs
+
+```
+POST   /api/v1/auth/register       - Email/password registration
+POST   /api/v1/auth/login          - Email/password login
+POST   /api/v1/auth/logout         - Logout (delete session)
+GET    /api/v1/auth/me             - Get current user
+POST   /api/v1/auth/verify-email   - Verify email with token
+POST   /api/v1/auth/resend-verification - Resend verification email
+
+# OAuth
+GET    /api/v1/auth/google         - Initiate Google OAuth
+GET    /api/v1/auth/google/callback - Google OAuth callback
+GET    /api/v1/auth/microsoft      - Initiate Microsoft OAuth
+GET    /api/v1/auth/microsoft/callback - Microsoft OAuth callback
+POST   /api/v1/auth/disconnect-oauth - Disconnect OAuth
+```
+
+### AI APIs
+
+```
+POST   /api/v1/ai                  - Chat with AI assistant
+GET    /api/v1/ai/suggestions      - Get chat suggestions
+```
 
 ---
 
-*API Docs: http://localhost:8000/api/docs*
+## 🔧 Technology Stack
+
+### Backend
+- **Framework**: FastAPI 0.115+
+- **Python**: 3.11+
+- **Database**: SQLite (ORM: SQLAlchemy)
+- **Authentication**: bcrypt, OAuth 2.0
+- **Email**: Resend API
+- **AI**: Google Gemini
+- **Rate Limiting**: SlowAPI
+- **Logging**: Structured JSON logging
+
+### Frontend
+- **Framework**: Vue 3.5+
+- **Language**: TypeScript 5.9+
+- **Build Tool**: Vite 7.1+
+- **Styling**: Tailwind CSS 4.0
+- **UI Components**: Shadcn/vue (Radix Vue)
+- **State Management**: Pinia
+- **HTTP Client**: Axios
+- **Testing**: Vitest, Playwright
+
+### External APIs
+- **Sublime Security** - Email analysis + ML link detection
+- **VirusTotal** - URL/domain/file reputation
+- **URLscan.io** - URL scanning + screenshots
+- **IPQS** - IP reputation checking
+- **Hybrid Analysis** - Sandbox file analysis (future)
+- **Google Gemini** - AI chat assistant
+- **Resend** - Email verification service
+
+---
+
+## 📊 Database Schema
+
+### Tables
+
+**users**
+- User accounts (email/password + OAuth)
+- Email verification status
+- Daily analysis limits
+
+**sessions**
+- User sessions (httpOnly cookies)
+- Expiration tracking
+- IP and user agent
+
+**guest_rate_limits**
+- IP-based rate limiting for guests
+- Daily counters per analysis type
+
+---
+
+## 🎨 Design Patterns
+
+### Backend
+- **Layered Architecture**: API → Services → Models
+- **Dependency Injection**: FastAPI dependencies for auth/rate limits
+- **Provider Pattern**: External API clients in `providers/`
+- **Pipeline Pattern**: Analysis pipeline orchestration
+- **Service Layer**: Business logic separated from API
+
+### Frontend
+- **Composition API**: Modern Vue 3 patterns
+- **Composables**: Reusable hooks in `hooks/`
+- **Component-Based**: Shadcn/vue components
+- **State Management**: Centralized Pinia stores
+- **Reactive Programming**: Refs and computed properties
+
+---
+
+## 🔐 Security Features
+
+- ✨ **OWASP Security Headers** (NEW)
+- bcrypt password hashing
+- httpOnly session cookies
+- Email domain validation (MX records)
+- Rate limiting (per-user and per-IP)
+- Input validation (Pydantic + enum)
+- ✨ Enum validation for parameters (NEW)
+- HTML sanitization (nh3)
+- CORS configuration
+- Request ID tracing
+- SQL injection prevention (ORM)
+
+---
+
+## 📝 Configuration Files
+
+| File | Purpose |
+|------|---------|
+| `.env.example` | Backend environment variables template |
+| `requirements.txt` | Python dependencies |
+| `package.json` | Node.js dependencies |
+| `tailwind.config.ts` | Tailwind CSS configuration |
+| `vite.config.ts` | Vite build configuration |
+| `components.json` | Shadcn/vue components config |
+
+---
+
+## 🚀 Key Improvements (Latest)
+
+1. ✅ **Constants Extraction** - `constants.py` for all config values
+2. ✅ **Security Headers** - OWASP-compliant middleware
+3. ✅ **Enum Validation** - Type-safe URLscan visibility parameter
+4. ✅ **Enhanced Documentation** - This detailed structure guide
+
+---
+
+**Last Updated**: December 15, 2025  
+**Version**: 1.0.0
