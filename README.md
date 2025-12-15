@@ -40,7 +40,12 @@ cd PhishCheck
 # Backend setup
 cd backend
 pip install -r requirements.txt
-cp .env.example .env  # Configure your API keys
+
+# Create your .env file with your own API keys
+# See .env.example for required variables
+touch .env  # or manually create the file
+# Then edit .env and add your API keys
+
 uvicorn app.main:app --reload
 
 # Frontend setup (new terminal)
@@ -48,6 +53,12 @@ cd frontend
 npm install
 npm run dev
 ```
+
+> **⚠️ SECURITY WARNING:**  
+> - **Create your own `.env` file** with your actual API keys
+> - **NEVER commit `.env`** to Git - it contains sensitive credentials
+> - Only `.env.example` (with placeholder values) should be in version control
+> - Keep your API keys secure and private
 
 ### Running Both
 ```bash
