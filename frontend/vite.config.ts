@@ -1,19 +1,29 @@
-import { fileURLToPath, URL } from 'node:url'
-import { defineConfig } from 'vite'
-
+import path from 'node:path'
 import tailwindcss from '@tailwindcss/vite'
 import vue from '@vitejs/plugin-vue'
-import vueDevTools from 'vite-plugin-vue-devtools'
+import { defineConfig } from 'vite'
 
-// https://vite.dev/config/
+import { fileURLToPath, URL } from 'node:url'
+
 export default defineConfig({
-  plugins: [
-    vue(),
-    tailwindcss(),
-  ],
+  plugins: [vue(), tailwindcss()],
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
+  },
+  build: {
+    // Code splitting for better caching
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Separate vendor chunks for better caching
+          'vue-vendor': ['vue', 'vue-router', 'pinia'],
+          'ui-vendor': ['lucide-vue-next'],
+        },
+      },
+    },
+    // Chunk size warning
+    chunkSizeWarningLimit: 500,
   },
 })

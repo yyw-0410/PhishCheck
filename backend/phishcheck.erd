@@ -1,0 +1,718 @@
+{
+  "$schema": "https://raw.githubusercontent.com/dineug/erd-editor/main/json-schema/schema.json",
+  "version": "3.0.0",
+  "settings": {
+    "width": 2000,
+    "height": 2000,
+    "scrollTop": -1269,
+    "scrollLeft": 0,
+    "zoomLevel": 1,
+    "show": 511,
+    "database": 32,
+    "databaseName": "phishcheck",
+    "canvasType": "ERD",
+    "language": 1,
+    "tableNameCase": 4,
+    "columnNameCase": 2,
+    "bracketType": 1,
+    "relationshipDataTypeSync": true,
+    "relationshipOptimization": false,
+    "columnOrder": [
+      1,
+      2,
+      4,
+      8,
+      16,
+      32,
+      64
+    ],
+    "maxWidthComment": -1,
+    "ignoreSaveSettings": 0
+  },
+  "doc": {
+    "tableIds": [
+      "table-users",
+      "table-sessions",
+      "table-oauth-states",
+      "table-guest-rate-limits"
+    ],
+    "relationshipIds": [
+      "rel-1"
+    ],
+    "indexIds": [],
+    "memoIds": []
+  },
+  "collections": {
+    "tableEntities": {
+      "table-users": {
+        "id": "table-users",
+        "name": "users",
+        "comment": "User accounts",
+        "columnIds": [
+          "col-1",
+          "col-2",
+          "col-3",
+          "col-4",
+          "col-5",
+          "col-6",
+          "col-7",
+          "col-8",
+          "col-9",
+          "col-10",
+          "col-11"
+        ],
+        "seqColumnIds": [
+          "col-1",
+          "col-2",
+          "col-3",
+          "col-4",
+          "col-5",
+          "col-6",
+          "col-7",
+          "col-8",
+          "col-9",
+          "col-10",
+          "col-11"
+        ],
+        "ui": {
+          "x": 430.69418069791277,
+          "y": 964.1735751430767,
+          "zIndex": 1,
+          "widthName": 60,
+          "widthComment": 76,
+          "color": "#00C853"
+        },
+        "meta": {
+          "updateAt": 1765719587684,
+          "createAt": 1765719579664
+        }
+      },
+      "table-sessions": {
+        "id": "table-sessions",
+        "name": "sessions",
+        "comment": "User sessions",
+        "columnIds": [
+          "col-s1",
+          "col-s2",
+          "col-s3",
+          "col-s4"
+        ],
+        "seqColumnIds": [
+          "col-s1",
+          "col-s2",
+          "col-s3",
+          "col-s4"
+        ],
+        "ui": {
+          "x": -44.316109590253845,
+          "y": 1196.340445384446,
+          "zIndex": 2,
+          "widthName": 60,
+          "widthComment": 72,
+          "color": "#2196F3"
+        },
+        "meta": {
+          "updateAt": 1765719587684,
+          "createAt": 1765719579664
+        }
+      },
+      "table-oauth-states": {
+        "id": "table-oauth-states",
+        "name": "oauth_states",
+        "comment": "OAuth CSRF protection",
+        "columnIds": [
+          "col-o1",
+          "col-o2",
+          "col-o3",
+          "col-o4"
+        ],
+        "seqColumnIds": [
+          "col-o1",
+          "col-o2",
+          "col-o3",
+          "col-o4"
+        ],
+        "ui": {
+          "x": 1047.9575203013167,
+          "y": 1039.869236783742,
+          "zIndex": 3,
+          "widthName": 68,
+          "widthComment": 124,
+          "color": "#FF9800"
+        },
+        "meta": {
+          "updateAt": 1765719587684,
+          "createAt": 1765719579664
+        }
+      },
+      "table-guest-rate-limits": {
+        "id": "table-guest-rate-limits",
+        "name": "guest_rate_limits",
+        "comment": "Guest IP rate limits",
+        "columnIds": [
+          "col-g1",
+          "col-g2",
+          "col-g3",
+          "col-g4",
+          "col-g5",
+          "col-g6"
+        ],
+        "seqColumnIds": [
+          "col-g1",
+          "col-g2",
+          "col-g3",
+          "col-g4",
+          "col-g5",
+          "col-g6"
+        ],
+        "ui": {
+          "x": 821.8561052887419,
+          "y": 542.7745667744393,
+          "zIndex": 4,
+          "widthName": 90,
+          "widthComment": 101,
+          "color": "#9C27B0"
+        },
+        "meta": {
+          "updateAt": 1765719587684,
+          "createAt": 1765719579664
+        }
+      }
+    },
+    "tableColumnEntities": {
+      "col-1": {
+        "id": "col-1",
+        "tableId": "table-users",
+        "name": "id",
+        "comment": "Primary key",
+        "dataType": "INTEGER",
+        "default": "",
+        "options": 11,
+        "ui": {
+          "keys": 1,
+          "widthName": 60,
+          "widthComment": 64,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1765719579664,
+          "createAt": 1765719579664
+        }
+      },
+      "col-2": {
+        "id": "col-2",
+        "tableId": "table-users",
+        "name": "email",
+        "comment": "Unique email",
+        "dataType": "VARCHAR(255)",
+        "default": "",
+        "options": 12,
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 72,
+          "widthDataType": 81,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1765719579664,
+          "createAt": 1765719579664
+        }
+      },
+      "col-3": {
+        "id": "col-3",
+        "tableId": "table-users",
+        "name": "password_hash",
+        "comment": "Hashed password",
+        "dataType": "VARCHAR(255)",
+        "default": "",
+        "options": 0,
+        "ui": {
+          "keys": 0,
+          "widthName": 82,
+          "widthComment": 95,
+          "widthDataType": 81,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1765719579664,
+          "createAt": 1765719579664
+        }
+      },
+      "col-4": {
+        "id": "col-4",
+        "tableId": "table-users",
+        "name": "name",
+        "comment": "Display name",
+        "dataType": "VARCHAR(255)",
+        "default": "",
+        "options": 8,
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 73,
+          "widthDataType": 81,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1765719579664,
+          "createAt": 1765719579664
+        }
+      },
+      "col-5": {
+        "id": "col-5",
+        "tableId": "table-users",
+        "name": "is_verified",
+        "comment": "Email verified",
+        "dataType": "BOOLEAN",
+        "default": "false",
+        "options": 0,
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 73,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1765719579664,
+          "createAt": 1765719579664
+        }
+      },
+      "col-6": {
+        "id": "col-6",
+        "tableId": "table-users",
+        "name": "daily_eml_count",
+        "comment": "EML limit: 5/day",
+        "dataType": "INTEGER",
+        "default": "0",
+        "options": 0,
+        "ui": {
+          "keys": 0,
+          "widthName": 86,
+          "widthComment": 87,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1765719579664,
+          "createAt": 1765719579664
+        }
+      },
+      "col-7": {
+        "id": "col-7",
+        "tableId": "table-users",
+        "name": "daily_link_count",
+        "comment": "Link limit: 15/day",
+        "dataType": "INTEGER",
+        "default": "0",
+        "options": 0,
+        "ui": {
+          "keys": 0,
+          "widthName": 86,
+          "widthComment": 92,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1765719579664,
+          "createAt": 1765719579664
+        }
+      },
+      "col-8": {
+        "id": "col-8",
+        "tableId": "table-users",
+        "name": "daily_file_count",
+        "comment": "File limit: 10/day",
+        "dataType": "INTEGER",
+        "default": "0",
+        "options": 0,
+        "ui": {
+          "keys": 0,
+          "widthName": 83,
+          "widthComment": 89,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1765719579664,
+          "createAt": 1765719579664
+        }
+      },
+      "col-9": {
+        "id": "col-9",
+        "tableId": "table-users",
+        "name": "daily_ai_count",
+        "comment": "AI limit: 20/day",
+        "dataType": "INTEGER",
+        "default": "0",
+        "options": 0,
+        "ui": {
+          "keys": 0,
+          "widthName": 76,
+          "widthComment": 82,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1765719579664,
+          "createAt": 1765719579664
+        }
+      },
+      "col-10": {
+        "id": "col-10",
+        "tableId": "table-users",
+        "name": "last_analysis_date",
+        "comment": "For daily reset",
+        "dataType": "DATETIME",
+        "default": "",
+        "options": 0,
+        "ui": {
+          "keys": 0,
+          "widthName": 94,
+          "widthComment": 76,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1765719579664,
+          "createAt": 1765719579664
+        }
+      },
+      "col-11": {
+        "id": "col-11",
+        "tableId": "table-users",
+        "name": "created_at",
+        "comment": "Created timestamp",
+        "dataType": "DATETIME",
+        "default": "",
+        "options": 0,
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 103,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1765719579664,
+          "createAt": 1765719579664
+        }
+      },
+      "col-s1": {
+        "id": "col-s1",
+        "tableId": "table-sessions",
+        "name": "id",
+        "comment": "Primary key",
+        "dataType": "INTEGER",
+        "default": "",
+        "options": 11,
+        "ui": {
+          "keys": 1,
+          "widthName": 60,
+          "widthComment": 64,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1765719579664,
+          "createAt": 1765719579664
+        }
+      },
+      "col-s2": {
+        "id": "col-s2",
+        "tableId": "table-sessions",
+        "name": "user_id",
+        "comment": "FK to users",
+        "dataType": "INTEGER",
+        "default": "",
+        "options": 8,
+        "ui": {
+          "keys": 2,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1765719579664,
+          "createAt": 1765719579664
+        }
+      },
+      "col-s3": {
+        "id": "col-s3",
+        "tableId": "table-sessions",
+        "name": "token",
+        "comment": "Session token",
+        "dataType": "VARCHAR(255)",
+        "default": "",
+        "options": 12,
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 75,
+          "widthDataType": 81,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1765719579664,
+          "createAt": 1765719579664
+        }
+      },
+      "col-s4": {
+        "id": "col-s4",
+        "tableId": "table-sessions",
+        "name": "expires_at",
+        "comment": "Expiry time",
+        "dataType": "DATETIME",
+        "default": "",
+        "options": 8,
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1765719579664,
+          "createAt": 1765719579664
+        }
+      },
+      "col-o1": {
+        "id": "col-o1",
+        "tableId": "table-oauth-states",
+        "name": "id",
+        "comment": "Primary key",
+        "dataType": "INTEGER",
+        "default": "",
+        "options": 11,
+        "ui": {
+          "keys": 1,
+          "widthName": 60,
+          "widthComment": 64,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1765719579664,
+          "createAt": 1765719579664
+        }
+      },
+      "col-o2": {
+        "id": "col-o2",
+        "tableId": "table-oauth-states",
+        "name": "state",
+        "comment": "CSRF state",
+        "dataType": "VARCHAR(255)",
+        "default": "",
+        "options": 12,
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 81,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1765719579664,
+          "createAt": 1765719579664
+        }
+      },
+      "col-o3": {
+        "id": "col-o3",
+        "tableId": "table-oauth-states",
+        "name": "provider",
+        "comment": "google/microsoft",
+        "dataType": "VARCHAR(50)",
+        "default": "",
+        "options": 8,
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 94,
+          "widthDataType": 75,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1765719579664,
+          "createAt": 1765719579664
+        }
+      },
+      "col-o4": {
+        "id": "col-o4",
+        "tableId": "table-oauth-states",
+        "name": "expires_at",
+        "comment": "10 min expiry",
+        "dataType": "DATETIME",
+        "default": "",
+        "options": 8,
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 73,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1765719579664,
+          "createAt": 1765719579664
+        }
+      },
+      "col-g1": {
+        "id": "col-g1",
+        "tableId": "table-guest-rate-limits",
+        "name": "id",
+        "comment": "Primary key",
+        "dataType": "INTEGER",
+        "default": "",
+        "options": 11,
+        "ui": {
+          "keys": 1,
+          "widthName": 60,
+          "widthComment": 64,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1765719579664,
+          "createAt": 1765719579664
+        }
+      },
+      "col-g2": {
+        "id": "col-g2",
+        "tableId": "table-guest-rate-limits",
+        "name": "ip_address",
+        "comment": "Client IP",
+        "dataType": "VARCHAR(45)",
+        "default": "",
+        "options": 8,
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 75,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1765719579664,
+          "createAt": 1765719579664
+        }
+      },
+      "col-g3": {
+        "id": "col-g3",
+        "tableId": "table-guest-rate-limits",
+        "name": "daily_eml_count",
+        "comment": "EML: 2/day",
+        "dataType": "INTEGER",
+        "default": "0",
+        "options": 0,
+        "ui": {
+          "keys": 0,
+          "widthName": 86,
+          "widthComment": 61,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1765719579664,
+          "createAt": 1765719579664
+        }
+      },
+      "col-g4": {
+        "id": "col-g4",
+        "tableId": "table-guest-rate-limits",
+        "name": "daily_link_count",
+        "comment": "Link: 5/day",
+        "dataType": "INTEGER",
+        "default": "0",
+        "options": 0,
+        "ui": {
+          "keys": 0,
+          "widthName": 86,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1765719579664,
+          "createAt": 1765719579664
+        }
+      },
+      "col-g5": {
+        "id": "col-g5",
+        "tableId": "table-guest-rate-limits",
+        "name": "daily_file_count",
+        "comment": "File: 3/day",
+        "dataType": "INTEGER",
+        "default": "0",
+        "options": 0,
+        "ui": {
+          "keys": 0,
+          "widthName": 83,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1765719579664,
+          "createAt": 1765719579664
+        }
+      },
+      "col-g6": {
+        "id": "col-g6",
+        "tableId": "table-guest-rate-limits",
+        "name": "last_analysis_date",
+        "comment": "For daily reset",
+        "dataType": "DATETIME",
+        "default": "",
+        "options": 0,
+        "ui": {
+          "keys": 0,
+          "widthName": 94,
+          "widthComment": 76,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1765719579664,
+          "createAt": 1765719579664
+        }
+      }
+    },
+    "relationshipEntities": {
+      "rel-1": {
+        "id": "rel-1",
+        "identification": false,
+        "relationshipType": 16,
+        "startRelationshipType": 2,
+        "start": {
+          "tableId": "table-users",
+          "columnIds": [
+            "col-1"
+          ],
+          "x": 430.69418069791277,
+          "y": 1124.1735751430767,
+          "direction": 1
+        },
+        "end": {
+          "tableId": "table-sessions",
+          "columnIds": [
+            "col-s2"
+          ],
+          "x": 409.68389040974614,
+          "y": 1272.340445384446,
+          "direction": 2
+        },
+        "meta": {
+          "updateAt": 1765719579664,
+          "createAt": 1765719579664
+        }
+      }
+    },
+    "indexEntities": {},
+    "indexColumnEntities": {},
+    "memoEntities": {}
+  }
+}
