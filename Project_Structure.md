@@ -105,6 +105,16 @@ PhishCheck/
 │
 ├── frontend/                         # Vue 3 + TypeScript Frontend
 │   ├── src/
+│   │   ├── views/                    # Page Components
+│   │   │   ├── AnalysisView.vue      # Email analysis (main page)
+│   │   │   ├── LinkAnalysisView.vue  # URL/Link analysis
+│   │   │   ├── FileAnalysisView.vue  # File hash analysis
+│   │   │   ├── ChatView.vue          # AI chat assistant
+│   │   │   ├── LoginView.vue         # Login page
+│   │   │   ├── SignupView.vue        # Registration page
+│   │   │   ├── AccountView.vue       # User account settings
+│   │   │   ├── EmailVerificationView.vue # Email verification
+│   │   │   ├── OAuthCallback.vue     # OAuth callback handler
 │   │   │   ├── NotificationsView.vue # Notifications
 │   │   │   ├── BillingView.vue       # Future: billing
 │   │   │   ├── FeedbackView.vue      # Feedback form
@@ -117,36 +127,45 @@ PhishCheck/
 │   │   │   ├── auth/                 # Auth Components
 │   │   │   │   ├── LoginForm.vue
 │   │   │   │   ├── SignupForm.vue
-│   │   │   │   └── OAuthButtons.vue
+│   │   │   │   └── VerificationBanner.vue
 │   │   │   │
-│   │   │   ├── chat/                 # AI Chat Components
-│   │   │   │   ├── ChatMessage.vue
-│   │   │   │   └── ChatInput.vue
+│   │   │   ├──chat/                 # AI Chat Components
+│   │   │   │   └── AIChatWidget.vue
 │   │   │   │
 │   │   │   ├── layout/               # Layout Components
-│   │   │   │   ├── Header.vue
-│   │   │   │   └── AppSidebar.vue
+│   │   │   │   ├── AppSidebar.vue
+│   │   │   │   ├── FloatingActions.vue
+│   │   │   │   ├── NavMain.vue
+│   │   │   │   ├── NavProjects.vue
+│   │   │   │   ├── NavSecondary.vue
+│   │   │   │   ├── NavUser.vue
+│   │   │   │   └── TopBar.vue
 │   │   │   │
 │   │   │   ├── icons/                # Custom Icons
 │   │   │   │   ├── IconGoogle.vue
 │   │   │   │   └── IconMicrosoft.vue
 │   │   │   │
 │   │   │   └── ui/                   # Shadcn/vue Components
+│   │   │       ├── JsonTreeNode.vue   # Custom JSON viewer
 │   │   │       ├── avatar/
 │   │   │       ├── badge/
+│   │   │       ├── breadcrumb/
 │   │   │       ├── button/
 │   │   │       ├── card/
+│   │   │       ├── collapsible/
 │   │   │       ├── dialog/
 │   │   │       ├── dropdown-menu/
+│   │   │       ├── field/
 │   │   │       ├── input/
 │   │   │       ├── label/
+│   │   │       ├── resizable/
+│   │   │       ├── scroll-to-top/
 │   │   │       ├── separator/
 │   │   │       ├── sheet/
 │   │   │       ├── sidebar/
 │   │   │       ├── skeleton/
 │   │   │       ├── switch/
-│   │   │       ├── tooltip/
-│   │   │       └── ... (20+ more)
+│   │   │       └── tooltip/
 │   │   │
 │   │   ├── stores/                   # Pinia State Management
 │   │   │   ├── analysis.ts           # Analysis state (results, loading)
