@@ -353,21 +353,133 @@ GET    /api/v1/ai/suggestions      - Get chat suggestions
 
 ## 📊 Database Schema
 
-### Tables
+### Tables Overview
 
-**users**
-- User accounts (email/password + OAuth)
-- Email verification status
-- Daily analysis limits
+PhishCheck uses **4 tables** for user management, authentication, and rate limiting:
 
-**sessions**
-- User sessions (httpOnly cookies)
-- Expiration tracking
-- IP and user agent
+#### 1. **users** - User Accounts
+Stores user account information, email verification status, and daily analysis limits.
 
-**guest_rate_limits**
-- IP-based rate limiting for guests
-- Daily counters per analysis type
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | INTEGER | Primary key (auto-increment) |
+| `email` | VARCHAR(255) | Unique email address |
+| `password_hash` | VARCHAR(255) | bcrypt hashed password (nullable for OAuth users) |
+| `name` | VARCHAR(255) | Display name |
+| `avatar` | VARCHAR(255) | Profile picture URL (nullable) |
+| `is_verified` | BOOLEAN | Email verification status (default: false) |
+| `is_active` | BOOLEAN | Account active status (default: true) |
+| `oauth_provider` | VARCHAR(50) | OAuth provider: google/microsoft (nullable) |
+| `oauth_id` | VARCHAR(255) | OAuth user ID (nullable) |
+| `oauth_email` | VARCHAR(255) | Email from OAuth provider (nullable) |
+| `oauth_access_token` | TEXT | Encrypted OAuth access token (nullable) |
+| `oauth_refresh_token` | TEXT | Encrypted OAuth refresh token (nullable) |
+| `verification_token` | VARCHAR(255) | Email verification token (nullable) |
+| `verification_token_expires` | DATETIME | Token expiry (48 hours) |
+| `daily_eml_count` | INTEGER | EML analysis count (limit: 5/day) |
+| `daily_link_count` | INTEGER | Link analysis count (limit: 10/day) |
+| `daily_file_count` | INTEGER | File analysis count (limit: 8/day) |
+| `daily_ai_count` | INTEGER | AI chat count (limit: 20/day) |
+| `last_analysis_date` | DATETIME | Last analysis timestamp (for daily reset) |
+| `last_login` | DATETIME | Last login timestamp |
+| `created_at` | DATETIME | Account creation timestamp |
+| `updated_at` | DATETIME | Last update timestamp |
+
+**Daily Limits (Unverified Users)**:
+- EML: 5/day
+- Link: 10/day
+- File: 8/day
+- AI: 20/day
+- **Verified users**: Unlimited
+
+---
+
+#### 2. **sessions** - User Sessions
+Stores active user sessions for authentication.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | INTEGER | Primary key (auto-increment) |
+| `user_id` | INTEGER | Foreign key → users.id |
+| `token` | VARCHAR(255) | Unique session token (stored in httpOnly cookie) |
+| `ip_address` | VARCHAR(45) | Client IP address |
+| `user_agent` | TEXT | Browser user agent |
+| `expires_at` | DATETIME | Session expiry (7 days from creation) |
+| `created_at` | DATETIME | Session creation timestamp |
+
+**Session Management**:
+- Expiry: 7 days
+- Storage: httpOnly cookies (prevents XSS)
+- Cleanup: Automatic on expiry or explicit logout
+
+---
+
+#### 3. **oauth_states** - OAuth CSRF Protection
+Temporary storage for OAuth state tokens to prevent CSRF attacks.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | INTEGER | Primary key (auto-increment) |
+| `state` | VARCHAR(255) | Unique random state token |
+| `provider` | VARCHAR(50) | OAuth provider: google/microsoft |
+| `expires_at` | DATETIME | Token expiry (10 minutes) |
+| `created_at` | DATETIME | Creation timestamp |
+
+**OAuth Flow**:
+1. Generate random state token before redirect
+2. Store in database with 10-minute expiry
+3. Verify state on callback
+4. Delete after successful validation
+
+---
+
+#### 4. **guest_rate_limits** - Guest IP Rate Limiting
+Tracks analysis usage for non-authenticated users by IP address.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | INTEGER | Primary key (auto-increment) |
+| `ip_address` | VARCHAR(45) | Client IP address (IPv4/IPv6) |
+| `daily_eml_count` | INTEGER | EML analysis count (limit: 2/day) |
+| `daily_link_count` | INTEGER | Link analysis count (limit: 5/day) |
+| `daily_file_count` | INTEGER | File analysis count (limit: 3/day) |
+| `last_analysis_date` | DATETIME | Last analysis timestamp (for daily reset) |
+| `created_at` | DATETIME | First request timestamp |
+
+**Guest Limits** (Lower to encourage signup):
+- EML: 2/day
+- Link: 5/day
+- File: 3/day
+- **AI chat**: Requires login (no guest access)
+
+---
+
+### Database Relationships
+
+```
+users (1) ——< (N) sessions
+   └─ One user can have multiple active sessions
+```
+
+**Foreign Keys**:
+- `sessions.user_id` → `users.id` (CASCADE DELETE)
+
+**Indexes**:
+- `users.email` - Unique index for fast login lookup
+- `sessions.token` - Unique index for session validation
+- `sessions.user_id` - Index for user session queries
+- `oauth_states.state` - Unique index for OAuth validation
+- `guest_rate_limits.ip_address` - Index for IP lookup
+
+---
+
+### Database File
+
+**Location**: `backend/phishcheck.db` (SQLite)  
+**ERD Diagram**: `backend/phishcheck.erd` (Visual schema)  
+**SQL Schema**: `schema.sql` (Table definitions)
+
+**Initialization**: Automatic on first run via SQLAlchemy models
 
 ---
 
