@@ -103,7 +103,7 @@ PhishCheck/
 
 ## Testing
 
-### Backend Tests
+### Backend Tests (23 tests ✅)
 
 ```bash
 cd backend
@@ -118,20 +118,27 @@ pytest --cov=app --cov-report=html
 pytest tests/test_auth_service.py -v
 ```
 
-### Frontend Tests
+**Test Coverage**:
+- ✅ API endpoints (health check, auth)
+- ✅ Authentication service (password hashing, sessions, email validation, OAuth)
+- ✅ Email parser (multipart emails, HTML sanitization)
+- ✅ Sublime API integration
+- ✅ Schema validation
+
+### Frontend Tests (Infrastructure configured)
 
 ```bash
 cd frontend
 
-# Run unit tests
-npm run test:unit
-
-# Run E2E tests
-npm run test:e2e
+# Test infrastructure configured (minimal test implementation)
+npm run test:unit  # Vitest
+npm run test:e2e   # Playwright
 
 # Run linter
 npm run lint
 ```
+
+**Note**: Frontend test infrastructure (Vitest, Playwright) is configured for future development. Primary testing focus has been on backend logic given the prototype nature of this project.
 
 ## License
 
