@@ -179,19 +179,17 @@ npm run lint
 
 Potential improvements and features for future development:
 
-### Enhanced Guest Rate Limiting
-- **Browser Fingerprinting**: Implement device fingerprinting to prevent users from bypassing rate limits by changing IP addresses (e.g., switching WiFi networks). Could use FingerprintJS or custom implementation combining browser attributes (User Agent, screen resolution, timezone, etc.).
-  - **Benefits**: More robust tracking across network changes
-  - **Considerations**: Privacy implications, licensing (BSL 1.1 for FingerprintJS v4+)
-  - **Implementation**: ~90 lines of code across 6 files (frontend + backend)
-
-### Additional Features
-- **Email Sandbox Preview**: Safe rendering of email HTML in isolated iframe
-- **Batch Analysis**: Upload and analyze multiple emails/URLs at once
-- **Analysis History**: Store and retrieve past analysis results
-- **Advanced Reporting**: Generate PDF reports of analysis findings
-- **Real-time Collaboration**: Share analysis results with team members
-- **API Webhooks**: Notify external systems of analysis completion
+- Browser fingerprinting for enhanced guest rate limiting
+- Email inbox integration with auto-scanning (Gmail/Outlook plugin)
+- Push notifications for real-time threat alerts
+- Analysis history storage and retrieval
+- Batch analysis for multiple files/URLs
+- PDF report generation and export
+- Email sandbox preview for safe HTML rendering
+- Team collaboration and shared workspaces
+- API webhooks for external integrations
+- Scheduled automated scanning
+- Subscription billing system (if monetizing)
 
 ## License
 
