@@ -346,7 +346,7 @@ class SublimeAnalysisClient:
                 return
 
             data = resp.json()
-            logger.info(f"Sublime ML: Response keys: {data.keys() if isinstance(data, dict) else 'not dict'}")
+            logger.debug(f"Sublime ML: Response keys: {data.keys() if isinstance(data, dict) else 'not dict'}")
 
             # Extract credential phishing analysis (computer vision)
             credphish = data.get("credphish") if isinstance(data, dict) else None

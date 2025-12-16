@@ -109,6 +109,9 @@ def configure_logging(environment: str = "development", log_level: str = "INFO")
     logging.getLogger("httpx").setLevel(logging.WARNING)
     logging.getLogger("httpcore").setLevel(logging.WARNING)
     logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
+    logging.getLogger("python_multipart").setLevel(logging.WARNING)
+    logging.getLogger("PIL").setLevel(logging.WARNING)
+    logging.getLogger("pillow").setLevel(logging.WARNING)
 
 
 # Convenience function for structured logging with extra fields
