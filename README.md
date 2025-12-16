@@ -79,6 +79,41 @@ npm run dev
 | IPQS | IP reputation |
 | Hybrid Analysis | Sandbox file analysis |
 | Google Gemini | AI chat assistant |
+| Resend | Email verification delivery |
+
+## Third-Party Acknowledgments
+
+### Backend Libraries
+PhishCheck is built using the following open-source Python libraries:
+- **FastAPI** - Modern web framework (MIT License)
+- **SQLAlchemy** - SQL toolkit and ORM (MIT License)
+- **bcrypt** - Password hashing (Apache 2.0 License)
+- **httpx** - HTTP client library (BSD License)
+- **Pydantic** - Data validation (MIT License)
+- **nh3** - HTML sanitization (MIT License)
+- **SlowAPI** - Rate limiting (MIT License)
+- **Pillow** - Image processing (HPND License)
+- **pyzbar** - QR code detection (MIT License)
+
+### Frontend Libraries
+Frontend built with modern JavaScript/TypeScript libraries:
+- **Vue.js 3** - Progressive JavaScript framework (MIT License)
+- **TypeScript** - Typed superset of JavaScript (Apache 2.0 License)
+- **Tailwind CSS** - Utility-first CSS framework (MIT License)
+- **Shadcn/vue** - Re-usable component library (MIT License)
+- **Pinia** - State management (MIT License)
+- **Vue Router** - Official routing library (MIT License)
+
+### External Services
+Integrated with the following security and infrastructure services:
+- **Sublime Security MDM** - Advanced email threat detection
+- **VirusTotal** - Multi-engine malware scanning service
+- **URLscan.io** - Automated website scanner
+- **IP Quality Score (IPQS)** - Fraud prevention and threat detection
+- **Google Gemini AI** - Advanced language model for AI assistance
+- **Resend** - Transactional email delivery platform
+
+*All services used comply with their respective terms of service and are used within free tier limits where applicable.*
 
 ## Project Structure
 
@@ -139,6 +174,24 @@ npm run lint
 ```
 
 **Note**: Frontend test infrastructure (Vitest, Playwright) is configured for future development. Primary testing focus has been on backend logic given the prototype nature of this project.
+
+## Future Enhancements
+
+Potential improvements and features for future development:
+
+### Enhanced Guest Rate Limiting
+- **Browser Fingerprinting**: Implement device fingerprinting to prevent users from bypassing rate limits by changing IP addresses (e.g., switching WiFi networks). Could use FingerprintJS or custom implementation combining browser attributes (User Agent, screen resolution, timezone, etc.).
+  - **Benefits**: More robust tracking across network changes
+  - **Considerations**: Privacy implications, licensing (BSL 1.1 for FingerprintJS v4+)
+  - **Implementation**: ~90 lines of code across 6 files (frontend + backend)
+
+### Additional Features
+- **Email Sandbox Preview**: Safe rendering of email HTML in isolated iframe
+- **Batch Analysis**: Upload and analyze multiple emails/URLs at once
+- **Analysis History**: Store and retrieve past analysis results
+- **Advanced Reporting**: Generate PDF reports of analysis findings
+- **Real-time Collaboration**: Share analysis results with team members
+- **API Webhooks**: Notify external systems of analysis completion
 
 ## License
 
