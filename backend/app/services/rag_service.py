@@ -433,11 +433,11 @@ class RAGService:
         
         client = await self._get_client()
         
-        # Try models in order - fastest first
+        # Try models in order - newest to oldest
         models_to_try = [
-            ("gemini-2.0-flash-lite", False),     # Fastest, good for simple queries
-            ("gemini-2.0-flash", False),          # Fast, more capable
-            ("gemini-2.5-flash", False),          # Latest, fallback
+            ("gemini-3-flash-preview", False),    # Newest (preview)
+            ("gemini-2.5-flash", False),          # Latest stable
+            ("gemini-2.0-flash", False),          # Fallback
         ]
         
         last_error = None
