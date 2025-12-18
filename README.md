@@ -92,6 +92,7 @@ PhishCheck is built using the following open-source Python libraries:
 - **Pydantic** - Data validation (MIT License)
 - **nh3** - HTML sanitization (MIT License)
 - **SlowAPI** - Rate limiting (MIT License)
+- **APScheduler** - Background task scheduling (MIT License)
 - **Pillow** - Image processing (HPND License)
 - **pyzbar** - QR code detection (MIT License)
 
@@ -188,7 +189,7 @@ Potential improvements and features for future development:
 - Email sandbox preview for safe HTML rendering
 - Team collaboration and shared workspaces
 - API webhooks for external integrations
-- Scheduled automated scanning
+- ~~Scheduled automated scanning~~ ✅ (Implemented: midnight cleanup)
 - Subscription billing system (if monetizing)
 
 ## License

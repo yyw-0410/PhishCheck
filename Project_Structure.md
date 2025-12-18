@@ -93,7 +93,7 @@ PhishCheck/
 │   │   └── test_sublime_mdm.py       # Sublime MDM schema tests
 │   │
 │   ├── scripts/                      # Utility Scripts
-│   │   ├── cleanup.py                # Cleanup old sessions/unverified users
+│   │   ├── cleanup.py                # Cleanup script (also runs at midnight automatically)
 │   │   ├── run_sublime.py            # Test Sublime API
 │   │   ├── filter_sublime_hits.py    # Parse Sublime responses
 │   │   └── api_test.py               # API testing
@@ -236,7 +236,7 @@ PhishCheck/
 
 | File | Purpose |
 |------|---------|
-| `main.py` | FastAPI app factory, middleware setup, exception handlers |
+| `main.py` | FastAPI app factory, middleware, scheduled tasks (APScheduler) |
 | `config.py` | Loads environment variables, validates settings |
 | `constants.py` | ✨ Centralized constants (file sizes, limits, timeouts) |
 | `security_headers.py` | ✨ OWASP security headers middleware |
@@ -351,6 +351,7 @@ GET    /api/v1/ai/suggestions      - Get chat suggestions
 - **Email**: Resend API
 - **AI**: Google Gemini
 - **Rate Limiting**: SlowAPI
+- **Scheduler**: APScheduler (background tasks)
 - **Logging**: Structured JSON logging
 
 ### Frontend
@@ -559,8 +560,11 @@ users (1) ——< (N) sessions
 2. ✅ **Security Headers** - OWASP-compliant middleware
 3. ✅ **Enum Validation** - Type-safe URLscan visibility parameter
 4. ✅ **Enhanced Documentation** - This detailed structure guide
+5. ✅ **Automatic Cleanup** - Scheduled midnight cleanup (APScheduler)
+   - Guest rate limits: Deleted daily (records older than 1 day)
+   - Unverified accounts: Deleted after 7 days
 
 ---
 
-**Last Updated**: December 15, 2025  
+**Last Updated**: December 18, 2025  
 **Version**: 1.0.0
