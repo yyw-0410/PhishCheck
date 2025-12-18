@@ -623,3 +623,31 @@ class AuthService:
         self.db.commit()
         
         return GUEST_DAILY_LIMITS[analysis_type] - new_count
+    
+    def cleanup_old_guest_records(self, days_old: int = 1) -> int:
+        """Delete guest rate limit records older than specified days.
+        
+        Since limits reset daily, records from previous days are stale.
+        Default is 1 day (delete anything from before today).
+        
+        Returns the number of records deleted.
+        """
+        from app.models.user import GuestRateLimit
+        
+        cutoff_date = datetime.now(timezone.utc) - timedelta(days=days_old)
+        
+        # Delete records where last_analysis_date is before cutoff
+        # Also delete records with no last_analysis_date that are just empty
+        stale_records = self.db.query(GuestRateLimit).filter(
+            GuestRateLimit.last_analysis_date < cutoff_date
+        ).all()
+        
+        count = len(stale_records)
+        
+        for record in stale_records:
+            self.db.delete(record)
+        
+        if count > 0:
+            self.db.commit()
+        
+        return count

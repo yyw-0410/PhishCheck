@@ -35,14 +35,60 @@ class RequestIDMiddleware(BaseHTTPMiddleware):
         return response
 
 
+def _run_cleanup_job():
+    """Scheduled cleanup job - runs at midnight daily."""
+    from app.core.database import SessionLocal
+    from app.services.auth_service import AuthService
+    
+    db = SessionLocal()
+    try:
+        auth_service = AuthService(db)
+        
+        # Clean up guest rate limit records older than 1 day
+        guest_count = auth_service.cleanup_old_guest_records(days_old=1)
+        if guest_count > 0:
+            logger.info(f"🧹 [Scheduled] Cleaned up {guest_count} stale guest rate limit record(s)")
+        
+        # Clean up unverified accounts older than 7 days
+        user_count = auth_service.cleanup_unverified_accounts(days_old=7)
+        if user_count > 0:
+            logger.info(f"🧹 [Scheduled] Cleaned up {user_count} unverified account(s)")
+    except Exception as e:
+        logger.error(f"❌ Scheduled cleanup failed: {e}")
+    finally:
+        db.close()
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Lifespan context manager for startup and shutdown events."""
+    from apscheduler.schedulers.background import BackgroundScheduler
+    from apscheduler.triggers.cron import CronTrigger
+    
     # Startup
     init_db()
     logger.info("✅ Database initialized")
+    
+    # Run cleanup immediately on startup
+    _run_cleanup_job()
+    
+    # Schedule cleanup to run at midnight (00:00) every day
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(
+        _run_cleanup_job,
+        trigger=CronTrigger(hour=0, minute=0),  # Midnight
+        id="daily_cleanup",
+        name="Daily database cleanup",
+        replace_existing=True
+    )
+    scheduler.start()
+    logger.info("⏰ Scheduled daily cleanup at midnight")
+    
     yield
-    # Shutdown (add cleanup code here if needed)
+    
+    # Shutdown
+    scheduler.shutdown(wait=False)
+    logger.info("⏰ Scheduler stopped")
 
 
 def _configure_middleware(app: FastAPI, settings: Settings) -> None:
