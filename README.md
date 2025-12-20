@@ -6,12 +6,12 @@ A full-stack phishing detection platform that analyzes emails and URLs using mul
 
 ## Features
 
-- 📧 **Email Analysis**: Upload .eml files for comprehensive phishing detection
-- 🔗 **Link Analysis**: Scan URLs with VirusTotal, URLscan.io, and Sublime ML
-- 📁 **File Analysis**: Check file hashes against threat databases
-- 🤖 **AI Assistant**: Get AI-powered recommendations and explanations
-- 🔐 **Authentication**: User accounts with OAuth (Google/Microsoft)
-- 📊 **Rate Limiting**: Guest and user-based daily limits
+- Email analysis: upload `.eml` files for phishing detection
+- Link analysis: scan URLs with VirusTotal, URLscan.io, and Sublime ML
+- File analysis: check file hashes or uploads against threat databases
+- AI assistant: recommendations and explanations
+- Authentication: email/password + OAuth (Google/Microsoft)
+- Rate limiting: guest and unverified user limits; verified users are unlimited
 
 ## Tech Stack
 
@@ -28,13 +28,13 @@ A full-stack phishing detection platform that analyzes emails and URLs using mul
 ### Prerequisites
 - Python 3.11+
 - Node.js 18+
-- API keys (see `.env.example`)
+- API keys (see `backend/.env.example`)
 
 ### Installation
 
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/PhishCheck.git
+git clone <your-repo-url>
 cd PhishCheck
 
 # Backend setup
@@ -42,32 +42,34 @@ cd backend
 pip install -r requirements.txt
 
 # Create your .env file with your own API keys
-# See .env.example for required variables
-touch .env  # or manually create the file
+# See backend/.env.example for required variables
+copy .env.example .env   # Windows
+# cp .env.example .env   # macOS/Linux
 # Then edit .env and add your API keys
 
 uvicorn app.main:app --reload
 
 # Frontend setup (new terminal)
-cd frontend
+cd ../frontend
 npm install
 npm run dev
 ```
 
-> **⚠️ SECURITY WARNING:**  
-> - **Create your own `.env` file** with your actual API keys
-> - **NEVER commit `.env`** to Git - it contains sensitive credentials
+> **SECURITY WARNING:**
+> - Create your own `backend/.env` file with your actual API keys
+> - NEVER commit `.env` to Git - it contains sensitive credentials
 > - Only `.env.example` (with placeholder values) should be in version control
 > - Keep your API keys secure and private
 
 ### Running Both
 ```bash
 # From root directory
-./start.bat  # Windows
+.\start.bat  # Windows
 ```
 
 ## API Documentation
-📚 **http://localhost:8000/api/docs** - Modern interactive API documentation
+
+**http://localhost:8000/api/docs** - Modern interactive API documentation
 
 ## External Integrations
 
@@ -122,24 +124,41 @@ See [Project_Structure.md](Project_Structure.md) for detailed organization.
 
 ```
 PhishCheck/
-├── backend/          # FastAPI Python API
-│   ├── app/
-│   │   ├── api/      # API routers
-│   │   ├── core/     # Config, database, logging
-│   │   ├── services/ # Business logic
-│   │   └── schemas/  # Pydantic models
-│   └── tests/
-│
-└── frontend/         # Vue 3 SPA
-    └── src/
-        ├── views/    # Page components
-        ├── stores/   # Pinia state
-        └── hooks/    # Composables
+|-- backend/          # FastAPI Python API
+|   |-- app/
+|   |   |-- api/      # API routers
+|   |   |-- core/     # Config, database, logging
+|   |   |-- services/ # Business logic
+|   |   |-- schemas/  # Pydantic models
+|   |-- tests/
+|   |-- scripts/
+|   |-- .env.example
+|   |-- requirements.txt
+|-- frontend/         # Vue 3 SPA
+|   |-- src/
+|   |   |-- views/    # Page components
+|   |   |-- stores/   # Pinia state
+|   |   |-- hooks/    # Composables
+|   |   |-- assets/
+|   |-- package.json
+|-- docs/
+|   |-- uml/
+|   |   |-- use-case.puml
+```
+
+## UML Use Case Diagram
+
+The use case diagram is provided as PlantUML: `docs/uml/use-case.puml`.
+
+Render it with:
+
+```bash
+plantuml docs/uml/use-case.puml
 ```
 
 ## Testing
 
-### Backend Tests (23 tests ✅)
+### Backend Tests (23 tests)
 
 ```bash
 cd backend
@@ -155,11 +174,11 @@ pytest tests/test_auth_service.py -v
 ```
 
 **Test Coverage**:
-- ✅ API endpoints (health check, auth)
-- ✅ Authentication service (password hashing, sessions, email validation, OAuth)
-- ✅ Email parser (multipart emails, HTML sanitization)
-- ✅ Sublime API integration
-- ✅ Schema validation
+- API endpoints (health check, auth)
+- Authentication service (password hashing, sessions, email validation, OAuth)
+- Email parser (multipart emails, HTML sanitization)
+- Sublime API integration
+- Schema validation
 
 ### Frontend Tests (Infrastructure configured)
 
@@ -189,7 +208,7 @@ Potential improvements and features for future development:
 - Email sandbox preview for safe HTML rendering
 - Team collaboration and shared workspaces
 - API webhooks for external integrations
-- ~~Scheduled automated scanning~~ ✅ (Implemented: midnight cleanup)
+- Scheduled automated scanning (implemented: midnight cleanup)
 - Subscription billing system (if monetizing)
 
 ## License

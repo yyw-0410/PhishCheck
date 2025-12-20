@@ -1,0 +1,50 @@
+@startuml
+title PhishCheck Use Case Diagram
+left to right direction
+
+actor "Guest User" as Guest
+actor "Registered User" as User
+actor "OAuth Provider" as OAuth
+actor "Email Service" as EmailSvc
+actor "Threat Intel Services" as ThreatIntel
+actor "AI Service" as AI
+
+Guest <|-- User
+
+rectangle "PhishCheck" {
+  usecase "Register Account" as UC_Register
+  usecase "Login (Email/Password)" as UC_Login
+  usecase "Login with OAuth" as UC_OAuth
+  usecase "Verify Email" as UC_Verify
+  usecase "Analyze Email (.eml)" as UC_Email
+  usecase "Analyze URL" as UC_URL
+  usecase "Analyze File/Hash" as UC_File
+  usecase "View Analysis Results" as UC_View
+  usecase "Chat with AI Assistant" as UC_AI
+  usecase "View Account and Limits" as UC_Account
+}
+
+Guest --> UC_Register
+Guest --> UC_Login
+Guest --> UC_Email
+Guest --> UC_URL
+Guest --> UC_File
+Guest --> UC_View
+
+User --> UC_AI
+User --> UC_Account
+User --> UC_Verify
+
+UC_OAuth ..> UC_Login : <<extend>>
+UC_Register ..> UC_Verify : <<include>>
+UC_Email ..> UC_View : <<include>>
+UC_URL ..> UC_View : <<include>>
+UC_File ..> UC_View : <<include>>
+
+OAuth --> UC_OAuth
+EmailSvc --> UC_Verify
+ThreatIntel --> UC_Email
+ThreatIntel --> UC_URL
+ThreatIntel --> UC_File
+AI --> UC_AI
+@enduml
