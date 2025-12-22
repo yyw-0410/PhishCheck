@@ -304,6 +304,9 @@ POST   /api/auth/validate             - Validate session token
 GET    /api/auth/verify-email         - Verify email with token
 POST   /api/auth/resend-verification  - Resend verification email
 POST   /api/auth/disconnect-oauth     - Disconnect OAuth
+PATCH  /api/auth/profile              - Update profile (name, avatar)
+POST   /api/auth/password             - Change password
+DELETE /api/auth/account              - Delete account
 
 # OAuth
 GET    /api/auth/google/login         - Initiate Google OAuth
