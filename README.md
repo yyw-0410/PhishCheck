@@ -141,19 +141,6 @@ PhishCheck/
 |   |   |-- hooks/    # Composables
 |   |   |-- assets/
 |   |-- package.json
-|-- docs/
-|   |-- uml/
-|   |   |-- use-case.puml
-```
-
-## UML Use Case Diagram
-
-The use case diagram is provided as PlantUML: `docs/uml/use-case.puml`.
-
-Render it with:
-
-```bash
-plantuml docs/uml/use-case.puml
 ```
 
 ## Testing
