@@ -89,13 +89,28 @@ function generateAvatar() {
     avatarPreview.value = avatarUrl.value
 }
 
-function saveAvatar() {
+async function saveAvatar() {
     if (user.value) {
-        user.value.avatar = avatarUrl.value
-        // Update localStorage
-        localStorage.setItem('user', JSON.stringify(user.value))
-        updateMessage.value = 'Profile picture updated!'
-        showAvatarDialog.value = false
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/auth/profile`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ avatar: avatarUrl.value })
+            })
+            if (response.ok) {
+                const updatedUser = await response.json()
+                authStore.user = updatedUser
+                localStorage.setItem('user', JSON.stringify(updatedUser))
+                updateMessage.value = 'Profile picture updated!'
+                showAvatarDialog.value = false
+            } else {
+                const data = await response.json()
+                errorMessage.value = data.detail || 'Failed to update avatar'
+            }
+        } catch {
+            errorMessage.value = 'Network error'
+        }
     }
 }
 
@@ -109,11 +124,27 @@ async function updateProfile() {
     updateMessage.value = ''
     errorMessage.value = ''
 
-    // TODO: Implement API call to update profile
-    setTimeout(() => {
-        updateMessage.value = 'Profile updated successfully!'
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/auth/profile`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ name: name.value })
+        })
+        if (response.ok) {
+            const updatedUser = await response.json()
+            authStore.user = updatedUser
+            localStorage.setItem('user', JSON.stringify(updatedUser))
+            updateMessage.value = 'Profile updated successfully!'
+        } else {
+            const data = await response.json()
+            errorMessage.value = data.detail || 'Failed to update profile'
+        }
+    } catch {
+        errorMessage.value = 'Network error'
+    } finally {
         isUpdating.value = false
-    }, 1000)
+    }
 }
 
 async function changePassword() {
@@ -131,14 +162,30 @@ async function changePassword() {
     }
 
     isUpdating.value = true
-    // TODO: Implement API call to change password
-    setTimeout(() => {
-        updateMessage.value = 'Password changed successfully!'
-        currentPassword.value = ''
-        newPassword.value = ''
-        confirmPassword.value = ''
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/auth/password`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+                current_password: currentPassword.value,
+                new_password: newPassword.value
+            })
+        })
+        if (response.ok) {
+            updateMessage.value = 'Password changed successfully!'
+            currentPassword.value = ''
+            newPassword.value = ''
+            confirmPassword.value = ''
+        } else {
+            const data = await response.json()
+            errorMessage.value = data.detail || 'Failed to change password'
+        }
+    } catch {
+        errorMessage.value = 'Network error'
+    } finally {
         isUpdating.value = false
-    }, 1000)
+    }
 }
 
 function connectGoogle() {
@@ -180,9 +227,21 @@ async function disconnectAccount(provider: string) {
 
 async function deleteAccount() {
     if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-        // TODO: Implement API call to delete account
-        await authStore.logout()
-        router.push('/')
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/auth/account`, {
+                method: 'DELETE',
+                credentials: 'include'
+            })
+            if (response.ok) {
+                await authStore.logout()
+                router.push('/')
+            } else {
+                const data = await response.json()
+                errorMessage.value = data.detail || 'Failed to delete account'
+            }
+        } catch {
+            errorMessage.value = 'Network error'
+        }
     }
 }
 

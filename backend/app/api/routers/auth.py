@@ -14,6 +14,8 @@ from app.models.user import OAuthState
 from app.schemas.auth import (
     AuthResponse,
     OAuthUserCreate,
+    PasswordChange,
+    ProfileUpdate,
     TokenValidation,
     UserLogin,
     UserRegister,
@@ -359,6 +361,111 @@ async def validate_token(
         )
     
     return TokenValidation(valid=False, message="Invalid or expired token")
+
+
+# ============== Account Management ==============
+
+@router.patch("/profile", response_model=UserResponse)
+async def update_profile(
+    profile_data: ProfileUpdate,
+    authorization: str = Header(None),
+    session_token: str = Cookie(None),
+    db: DBSession = Depends(get_db)
+):
+    """Update user profile (name and avatar)."""
+    token = session_token or (authorization.replace("Bearer ", "") if authorization and authorization.startswith("Bearer ") else None)
+    
+    if not token:
+        raise HTTPException(status_code=401, detail="Missing authorization token")
+    
+    auth_service = AuthService(db)
+    user = auth_service.validate_session(token)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid or expired session")
+    
+    # Update fields if provided
+    if profile_data.name is not None:
+        user.name = profile_data.name
+    if profile_data.avatar is not None:
+        user.avatar = profile_data.avatar if profile_data.avatar else None
+    
+    user.updated_at = datetime.now(timezone.utc)
+    db.commit()
+    db.refresh(user)
+    
+    return UserResponse.model_validate(user)
+
+
+@router.post("/password")
+async def change_password(
+    password_data: PasswordChange,
+    authorization: str = Header(None),
+    session_token: str = Cookie(None),
+    db: DBSession = Depends(get_db)
+):
+    """Change user password."""
+    import bcrypt
+    
+    token = session_token or (authorization.replace("Bearer ", "") if authorization and authorization.startswith("Bearer ") else None)
+    
+    if not token:
+        raise HTTPException(status_code=401, detail="Missing authorization token")
+    
+    auth_service = AuthService(db)
+    user = auth_service.validate_session(token)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid or expired session")
+    
+    # OAuth-only users cannot change password
+    if not user.password_hash:
+        raise HTTPException(status_code=400, detail="OAuth accounts cannot change password")
+    
+    # Verify current password
+    if not bcrypt.checkpw(password_data.current_password.encode('utf-8'), user.password_hash.encode('utf-8')):
+        raise HTTPException(status_code=400, detail="Current password is incorrect")
+    
+    # Hash and save new password
+    new_hash = bcrypt.hashpw(password_data.new_password.encode('utf-8'), bcrypt.gensalt())
+    user.password_hash = new_hash.decode('utf-8')
+    user.updated_at = datetime.now(timezone.utc)
+    db.commit()
+    
+    return {"message": "Password changed successfully"}
+
+
+@router.delete("/account")
+async def delete_account(
+    response: Response,
+    authorization: str = Header(None),
+    session_token: str = Cookie(None),
+    db: DBSession = Depends(get_db)
+):
+    """Delete user account and all associated data."""
+    token = session_token or (authorization.replace("Bearer ", "") if authorization and authorization.startswith("Bearer ") else None)
+    
+    if not token:
+        raise HTTPException(status_code=401, detail="Missing authorization token")
+    
+    auth_service = AuthService(db)
+    user = auth_service.validate_session(token)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid or expired session")
+    
+    user_id = user.id
+    
+    # Delete all user sessions first
+    from app.models.user import Session
+    db.query(Session).filter(Session.user_id == user_id).delete()
+    
+    # Delete the user
+    db.delete(user)
+    db.commit()
+    
+    # Clear cookie
+    response.delete_cookie(COOKIE_NAME)
+    
+    logger.info(f"Account deleted: user_id={user_id}")
+    return {"message": "Account deleted successfully"}
 
 
 # ============== Microsoft OAuth ==============
