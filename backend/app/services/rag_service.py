@@ -435,9 +435,9 @@ class RAGService:
         
         # Try models in order - newest to oldest
         models_to_try = [
-            ("gemini-3-flash-preview", False),    # Newest (preview)
-            ("gemini-2.5-flash", False),          # Latest stable
-            ("gemini-2.0-flash", False),          # Fallback
+            ("gemini-3-flash-preview", False),    # Gemini 3 (newest)
+            ("gemini-2.5-flash", False),          # Stable fallback
+            ("gemini-2.0-flash", False),          # Legacy fallback
         ]
         
         last_error = None

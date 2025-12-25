@@ -19,3 +19,7 @@ class LinkAnalysisResult(BaseModel):
     virustotal: List[VirusTotalLookup] = []
     is_download: bool = False
     content_type: Optional[str] = None
+    # Risk assessment (calculated by backend)
+    risk_score: int = 0
+    overall_verdict: str = "unknown"
+    risk_factors: List[str] = []

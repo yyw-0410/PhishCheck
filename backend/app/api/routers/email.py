@@ -25,7 +25,7 @@ class URLScanVisibility(str, Enum):
     "/email",
     response_model=CombinedAnalysisResult,
     summary="Analyze an uploaded email using Sublime and threat intelligence providers.",
-    dependencies=[Depends(optional_api_key)],
+    dependencies=[Depends(optional_api_key), Depends(get_analysis_context('eml'))],
 )
 @limiter.limit("5/minute")
 async def analyze_email(

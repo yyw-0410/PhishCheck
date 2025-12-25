@@ -296,92 +296,25 @@ const submitLink = async () => {
     }
 }
 
-// Overall risk assessment
+// Overall risk assessment - now uses backend-calculated values
 const overallRisk = computed(() => {
     if (!analysisResult.value) return null
 
-    const ml = analysisResult.value?.urlscan?.ml_link
-    const vtData = analysisResult.value?.virustotal?.[0]?.data?.attributes?.last_analysis_stats
-    const analyzedUrl = analysisResult.value?.urlscan?.url || ''
+    // Use backend-calculated risk score and verdict
+    const riskScore = analysisResult.value.risk_score ?? 0
+    const verdict = analysisResult.value.overall_verdict ?? 'unknown'
+    const riskFactors = analysisResult.value.risk_factors ?? []
 
-    let riskScore = 0
-    const riskFactors: string[] = []
-
-    // Check if URL is a download link (executable/archive file extension)
-    const downloadExtensions = [
-        // Executables & Installers
-        '.exe', '.scr', '.bat', '.cmd', '.msi', '.dll', '.com', '.cpl', '.reg',
-        // Archives
-        '.zip', '.rar', '.7z', '.tar', '.gz', '.iso', '.cab',
-        // Scripts
-        '.ps1', '.vbs', '.js', '.hta', '.wsf', '.jse', '.vbe', '.sh', '.bin', '.py',
-        // Mobile & Java
-        '.dmg', '.apk', '.jar',
-        // Office Macros
-        '.docm', '.xlsm', '.pptm'
-    ]
-    const urlPath = analyzedUrl.toLowerCase().split('?')[0]
-    const isExtensionDownload = downloadExtensions.some(ext => urlPath.endsWith(ext))
-
-    // Check if API detected download via Content-Type/Content-Disposition
-    const isApiDetectedDownload = analysisResult.value?.is_download === true
-
-    // Combined check
-    const isDownloadLink = isExtensionDownload || isApiDetectedDownload
-
-    // Check if URL uses raw IP address instead of domain
-    const ipPattern = /^https?:\/\/(\d{1,3}\.){3}\d{1,3}/
-    const isRawIP = ipPattern.test(analyzedUrl)
-
-    // Download link is inherently more risky
-    if (isDownloadLink) {
-        riskScore += 25
-        riskFactors.push('Direct file download link')
+    // Map backend verdict to UI display
+    if (verdict === 'malicious' || riskScore >= 70) {
+        return { level: 'critical', label: 'Malicious', color: 'text-red-500', bgColor: 'bg-red-500/10', borderColor: 'border-red-500/30', icon: XCircle, factors: riskFactors }
     }
-
-    // Raw IP URLs are suspicious
-    if (isRawIP) {
-        riskScore += 10
-        riskFactors.push('Uses raw IP address (no domain)')
+    if (verdict === 'suspicious' || riskScore >= 40) {
+        return { level: 'high', label: 'Suspicious', color: 'text-orange-500', bgColor: 'bg-orange-500/10', borderColor: 'border-orange-500/30', icon: AlertOctagon, factors: riskFactors }
     }
-
-    // ML Score contribution
-    if (ml?.score) {
-        riskScore += ml.score * 50
-        if (ml.score >= 0.8) riskFactors.push('High ML malicious score')
-        else if (ml.score >= 0.5) riskFactors.push('Moderate ML suspicious score')
+    if (verdict === 'low_risk' || riskScore >= 20) {
+        return { level: 'medium', label: 'Low Risk', color: 'text-yellow-500', bgColor: 'bg-yellow-500/10', borderColor: 'border-yellow-500/30', icon: AlertTriangle, factors: riskFactors }
     }
-
-    // VirusTotal contribution - increased weight for any malicious detection
-    if (vtData) {
-        const malicious = vtData.malicious || 0
-        const suspicious = vtData.suspicious || 0
-        if (malicious > 0) {
-            // Base 15 points for any detection, plus 10 per additional
-            riskScore += 15 + Math.min(malicious * 10, 45)
-            riskFactors.push(`${malicious} VT malicious detections`)
-        }
-        if (suspicious > 0) {
-            riskScore += Math.min(suspicious * 3, 15)
-            riskFactors.push(`${suspicious} VT suspicious detections`)
-        }
-    }
-
-    // Tags contribution
-    const tags = analysisResult.value?.urlscan?.tags || []
-    if (tags.includes('phishing')) {
-        riskScore += 20
-        riskFactors.push('Tagged as phishing')
-    }
-    if (tags.includes('malware')) {
-        riskScore += 25
-        riskFactors.push('Tagged as malware')
-    }
-
-    // Determine verdict using industry labels
-    if (riskScore >= 70) return { level: 'critical', label: 'Malicious', color: 'text-red-500', bgColor: 'bg-red-500/10', borderColor: 'border-red-500/30', icon: XCircle, factors: riskFactors }
-    if (riskScore >= 40) return { level: 'high', label: 'Suspicious', color: 'text-orange-500', bgColor: 'bg-orange-500/10', borderColor: 'border-orange-500/30', icon: AlertOctagon, factors: riskFactors }
-    if (riskScore >= 20) return { level: 'medium', label: 'Low Risk', color: 'text-yellow-500', bgColor: 'bg-yellow-500/10', borderColor: 'border-yellow-500/30', icon: AlertTriangle, factors: riskFactors }
     return { level: 'low', label: 'Clean', color: 'text-emerald-500', bgColor: 'bg-emerald-500/10', borderColor: 'border-emerald-500/30', icon: CheckCircle, factors: riskFactors.length ? riskFactors : ['No significant threats detected'] }
 })
 
@@ -810,7 +743,7 @@ function prettyJson(value: unknown): string {
                         <div class="mt-2 space-y-1 pl-6">
                             <div v-for="(redirectUrl, idx) in sublimeMlData.redirects" :key="idx"
                                 class="flex items-center gap-2 text-xs font-mono bg-muted/30 rounded px-3 py-2">
-                                <span class="text-muted-foreground w-4">{{ idx + 1 }}.</span>
+                                <span class="text-muted-foreground w-4">{{ Number(idx) + 1 }}.</span>
                                 <span class="truncate">{{ redirectUrl }}</span>
                             </div>
                         </div>
@@ -920,7 +853,7 @@ function prettyJson(value: unknown): string {
                                 <span class="font-medium text-emerald-500">Clean</span>
                             </div>
                             <span class="text-xl font-bold text-emerald-500">{{ vtStats.harmless + vtStats.undetected
-                                }}</span>
+                            }}</span>
                         </div>
                     </div>
                     <div v-else class="text-muted-foreground flex items-center gap-2">
@@ -1237,7 +1170,7 @@ function prettyJson(value: unknown): string {
                                                                 :class="{ 'rotate-90': isJsonNodeExpanded(`raw.${key}.${key2}`) }" />
                                                             <span class="text-foreground">{{ key2 }}:</span>
                                                             <span class="text-muted-foreground">{{ getItemLabel(val2)
-                                                            }}</span>
+                                                                }}</span>
                                                         </button>
                                                         <!-- Level 3 -->
                                                         <div v-if="isJsonNodeExpanded(`raw.${key}.${key2}`)"
@@ -1254,14 +1187,15 @@ function prettyJson(value: unknown): string {
                                                                                 class="w-3 h-3 text-muted-foreground transition-transform shrink-0"
                                                                                 :class="{ 'rotate-90': isJsonNodeExpanded(`raw.${key}.${key2}.${key3}`) }" />
                                                                             <span class="text-foreground">{{ key3
-                                                                            }}:</span>
+                                                                                }}:</span>
                                                                             <span class="text-muted-foreground">{{
                                                                                 getItemLabel(val3) }}</span>
                                                                         </button>
                                                                         <!-- Level 4 -->
                                                                         <div v-if="isJsonNodeExpanded(`raw.${key}.${key2}.${key3}`)"
                                                                             class="pl-4 border-l border-border/40 ml-1.5 mt-0.5">
-                                                                            <template v-for="(val4, key4) in (val3 as object)"
+                                                                            <template
+                                                                                v-for="(val4, key4) in (val3 as object)"
                                                                                 :key="`raw.${key}.${key2}.${key3}.${key4}`">
                                                                                 <div class="py-0.5">
                                                                                     <template
@@ -1272,13 +1206,19 @@ function prettyJson(value: unknown): string {
                                                                                             <ChevronRight
                                                                                                 class="w-3 h-3 text-muted-foreground transition-transform shrink-0"
                                                                                                 :class="{ 'rotate-90': isJsonNodeExpanded(`raw.${key}.${key2}.${key3}.${key4}`) }" />
-                                                                                            <span class="text-foreground">{{ key4 }}:</span>
-                                                                                            <span class="text-muted-foreground">{{ getItemLabel(val4) }}</span>
+                                                                                            <span
+                                                                                                class="text-foreground">{{
+                                                                                                    key4 }}:</span>
+                                                                                            <span
+                                                                                                class="text-muted-foreground">{{
+                                                                                                    getItemLabel(val4)
+                                                                                                }}</span>
                                                                                         </button>
                                                                                         <!-- Level 5 -->
                                                                                         <div v-if="isJsonNodeExpanded(`raw.${key}.${key2}.${key3}.${key4}`)"
                                                                                             class="pl-4 border-l border-border/40 ml-1.5 mt-0.5">
-                                                                                            <template v-for="(val5, key5) in (val4 as object)"
+                                                                                            <template
+                                                                                                v-for="(val5, key5) in (val4 as object)"
                                                                                                 :key="`raw.${key}.${key2}.${key3}.${key4}.${key5}`">
                                                                                                 <div class="py-0.5">
                                                                                                     <template
@@ -1289,19 +1229,36 @@ function prettyJson(value: unknown): string {
                                                                                                             <ChevronRight
                                                                                                                 class="w-3 h-3 text-muted-foreground transition-transform shrink-0"
                                                                                                                 :class="{ 'rotate-90': isJsonNodeExpanded(`raw.${key}.${key2}.${key3}.${key4}.${key5}`) }" />
-                                                                                                            <span class="text-foreground">{{ key5 }}:</span>
-                                                                                                            <span class="text-muted-foreground">{{ getItemLabel(val5) }}</span>
+                                                                                                            <span
+                                                                                                                class="text-foreground">{{
+                                                                                                                    key5
+                                                                                                                }}:</span>
+                                                                                                            <span
+                                                                                                                class="text-muted-foreground">{{
+                                                                                                                    getItemLabel(val5)
+                                                                                                                }}</span>
                                                                                                         </button>
                                                                                                         <!-- Level 6+ - Show as JSON -->
                                                                                                         <div v-if="isJsonNodeExpanded(`raw.${key}.${key2}.${key3}.${key4}.${key5}`)"
                                                                                                             class="pl-4 border-l border-border/40 ml-1.5 mt-0.5">
-                                                                                                            <pre class="text-foreground whitespace-pre-wrap break-words text-xs">{{ prettyJson(val5) }}</pre>
+                                                                                                            <pre
+                                                                                                                class="text-foreground whitespace-pre-wrap break-words text-xs">{{ prettyJson(val5) }}</pre>
                                                                                                         </div>
                                                                                                     </template>
                                                                                                     <template v-else>
-                                                                                                        <div class="flex items-start gap-1.5 pl-4">
-                                                                                                            <span class="text-foreground shrink-0">{{ key5 }}:</span>
-                                                                                                            <span class="text-muted-foreground ml-1 break-all">{{ val5 === null ? 'null' : val5 }}</span>
+                                                                                                        <div
+                                                                                                            class="flex items-start gap-1.5 pl-4">
+                                                                                                            <span
+                                                                                                                class="text-foreground shrink-0">{{
+                                                                                                                    key5
+                                                                                                                }}:</span>
+                                                                                                            <span
+                                                                                                                class="text-muted-foreground ml-1 break-all">{{
+                                                                                                                    val5 ===
+                                                                                                                        null ?
+                                                                                                                        'null' :
+                                                                                                                        val5
+                                                                                                                }}</span>
                                                                                                         </div>
                                                                                                     </template>
                                                                                                 </div>
@@ -1309,9 +1266,15 @@ function prettyJson(value: unknown): string {
                                                                                         </div>
                                                                                     </template>
                                                                                     <template v-else>
-                                                                                        <div class="flex items-start gap-1.5 pl-4">
-                                                                                            <span class="text-foreground shrink-0">{{ key4 }}:</span>
-                                                                                            <span class="text-muted-foreground ml-1 break-all">{{ val4 === null ? 'null' : val4 }}</span>
+                                                                                        <div
+                                                                                            class="flex items-start gap-1.5 pl-4">
+                                                                                            <span
+                                                                                                class="text-foreground shrink-0">{{
+                                                                                                    key4 }}:</span>
+                                                                                            <span
+                                                                                                class="text-muted-foreground ml-1 break-all">{{
+                                                                                                    val4 === null ? 'null' :
+                                                                                                        val4 }}</span>
                                                                                         </div>
                                                                                     </template>
                                                                                 </div>

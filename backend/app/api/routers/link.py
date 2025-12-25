@@ -15,11 +15,83 @@ from .dependencies import (
 router = APIRouter()
 
 
+def _calculate_link_verdict(result: LinkAnalysisResult, url_str: str):
+    """Calculate overall verdict and risk score from analysis results (additive scoring)."""
+    risk_score = 0
+    risk_factors = []
+    
+    # 1. Download link detection
+    if result.is_download:
+        risk_score += 25
+        risk_factors.append("Direct file download link")
+    
+    # 2. Raw IP address detection
+    import re
+    ip_pattern = r'^https?://(\d{1,3}\.){3}\d{1,3}'
+    if re.match(ip_pattern, url_str):
+        risk_score += 10
+        risk_factors.append("Uses raw IP address (no domain)")
+    
+    # 3. Sublime ML Score contribution
+    ml = result.urlscan.ml_link if result.urlscan else None
+    if ml and ml.get("score"):
+        ml_score = ml.get("score", 0)
+        risk_score += int(ml_score * 50)
+        if ml_score >= 0.8:
+            risk_factors.append("High ML malicious score")
+        elif ml_score >= 0.5:
+            risk_factors.append("Moderate ML suspicious score")
+    
+    # 4. VirusTotal contribution
+    if result.virustotal:
+        vt_data = result.virustotal[0].data if result.virustotal[0].data else {}
+        vt_stats = vt_data.get("attributes", {}).get("last_analysis_stats", {})
+        malicious = vt_stats.get("malicious", 0)
+        suspicious = vt_stats.get("suspicious", 0)
+        
+        if malicious > 0:
+            risk_score += 15 + min(malicious * 10, 45)
+            risk_factors.append(f"{malicious} VT malicious detections")
+        if suspicious > 0:
+            risk_score += min(suspicious * 3, 15)
+            risk_factors.append(f"{suspicious} VT suspicious detections")
+    
+    # 5. URLScan tags contribution
+    if result.urlscan and result.urlscan.tags:
+        tags = result.urlscan.tags
+        if "phishing" in tags:
+            risk_score += 20
+            risk_factors.append("Tagged as phishing")
+        if "malware" in tags:
+            risk_score += 25
+            risk_factors.append("Tagged as malware")
+    
+    # Cap at 100
+    risk_score = min(100, risk_score)
+    
+    # Determine verdict
+    if risk_score >= 70:
+        verdict = "malicious"
+    elif risk_score >= 40:
+        verdict = "suspicious"
+    elif risk_score >= 20:
+        verdict = "low_risk"
+    else:
+        verdict = "clean"
+    
+    if not risk_factors:
+        risk_factors.append("No significant threats detected")
+    
+    result.risk_score = risk_score
+    result.overall_verdict = verdict
+    result.risk_factors = risk_factors
+
+
 @router.post(
     "/link",
     response_model=LinkAnalysisResult,
     summary="Analyze a URL using VirusTotal, urlscan.io, and Sublime ML.",
-    dependencies=[Depends(optional_api_key)],
+    dependencies=[Depends(optional_api_key), Depends(get_analysis_context('link'))],
 )
 @limiter.limit("20/minute")
 async def analyze_link(
@@ -81,6 +153,9 @@ async def analyze_link(
     
     # Increment analysis count after successful analysis
     ctx.increment_usage()
+    
+    # Calculate risk score and verdict (like File Analysis)
+    _calculate_link_verdict(result, url_str)
     
     return result
 

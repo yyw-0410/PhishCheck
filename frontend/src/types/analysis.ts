@@ -174,6 +174,10 @@ export type LinkAnalysisResult = {
   virustotal?: VirusTotalLookup[] | null
   is_download?: boolean
   content_type?: string | null
+  // Risk assessment (calculated by backend)
+  risk_score?: number
+  overall_verdict?: string
+  risk_factors?: string[]
 }
 
 // File Analysis Result from /api/analysis/file endpoint

@@ -113,7 +113,7 @@ def _calculate_file_verdict(result: FileAnalysisResult):
     "/file",
     response_model=FileAnalysisResult,
     summary="Analyze a file by uploading it or providing its hash.",
-    dependencies=[Depends(optional_api_key)],
+    dependencies=[Depends(optional_api_key), Depends(get_analysis_context('file'))],
 )
 @limiter.limit("10/minute")
 async def analyze_file(

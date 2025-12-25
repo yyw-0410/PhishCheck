@@ -33,7 +33,7 @@ async def _get_recommendation_client() -> httpx.AsyncClient:
     "",
     response_model=ChatResponse,
     summary="Ask a question about email analysis.",
-    dependencies=[Depends(optional_api_key)],
+    dependencies=[Depends(optional_api_key), Depends(get_analysis_context('ai'))],
 )
 @limiter.limit("30/minute")
 async def chat(
@@ -203,7 +203,7 @@ Rules:
                 logger.info(f"AI Recommendation: Trying {key_label} for score={score}, verdict={verdict}")
                 
                 response = await client.post(
-                    f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={api_key}",
+                    f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key={api_key}",
                     json={
                         "contents": [{"parts": [{"text": prompt}]}],
                         "generationConfig": {

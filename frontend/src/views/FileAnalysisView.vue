@@ -141,6 +141,7 @@ const submitFileAnalysis = async () => {
         const response = await fetch(`${API_BASE_URL}/api/v1/analysis/file`, {
             method: 'POST',
             body: formData,
+            credentials: 'include',
         })
 
         if (!response.ok) {
@@ -182,6 +183,7 @@ const submitHashAnalysis = async () => {
 
         const response = await fetch(`${API_BASE_URL}/api/v1/analysis/file?${queryParam}`, {
             method: 'POST',
+            credentials: 'include',
         })
 
         if (!response.ok) {
@@ -839,12 +841,12 @@ function prettyJson(value: unknown): string {
                                         <div v-if="signatureInfo['original name']" class="flex gap-3">
                                             <span class="text-sm text-muted-foreground w-20 shrink-0">Original</span>
                                             <span class="text-sm font-medium">{{ signatureInfo['original name']
-                                                }}</span>
+                                            }}</span>
                                         </div>
                                         <div v-if="signatureInfo['internal name']" class="flex gap-3">
                                             <span class="text-sm text-muted-foreground w-20 shrink-0">Internal</span>
                                             <span class="text-sm font-medium">{{ signatureInfo['internal name']
-                                                }}</span>
+                                            }}</span>
                                         </div>
                                         <div v-if="signatureInfo.copyright || signatureInfo['legal copyright']"
                                             class="flex gap-3">
@@ -893,7 +895,7 @@ function prettyJson(value: unknown): string {
                                         <div v-for="(verdict, sandbox) in analysisResult.virustotal.sandbox_verdicts"
                                             :key="sandbox" class="flex items-center gap-3">
                                             <span class="text-sm text-muted-foreground w-28 shrink-0">{{ sandbox
-                                            }}</span>
+                                                }}</span>
                                             <span
                                                 class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium border"
                                                 :class="{
@@ -922,14 +924,14 @@ function prettyJson(value: unknown): string {
                                     <CheckCircle class="w-4 h-4 text-emerald-500" />
                                     <span class="text-emerald-500 font-semibold text-lg">{{
                                         analysisResult.virustotal.raw_data?.attributes?.total_votes?.harmless || 0
-                                    }}</span>
+                                        }}</span>
                                     <span class="text-sm text-muted-foreground">Harmless</span>
                                 </div>
                                 <div class="flex items-center gap-1.5">
                                     <XCircle class="w-4 h-4 text-red-500" />
                                     <span class="text-red-500 font-semibold text-lg">{{
                                         analysisResult.virustotal.raw_data?.attributes?.total_votes?.malicious || 0
-                                    }}</span>
+                                        }}</span>
                                     <span class="text-sm text-muted-foreground">Malicious</span>
                                 </div>
                             </div>
@@ -1118,7 +1120,7 @@ function prettyJson(value: unknown): string {
                                                 'text-orange-500': analysisResult.hybrid_analysis.threat_score >= 30 && analysisResult.hybrid_analysis.threat_score < 70,
                                                 'text-emerald-500': analysisResult.hybrid_analysis.threat_score < 30
                                             }">{{ analysisResult.hybrid_analysis.threat_score
-                                                }}%</span>
+                                            }}%</span>
                                         </div>
                                         <div class="w-full h-2.5 rounded-full overflow-hidden bg-muted/40 shadow-inner">
                                             <div class="h-full rounded-full transition-all duration-700 ease-out shadow-sm"
@@ -1160,7 +1162,7 @@ function prettyJson(value: unknown): string {
                                                         'Clean') }}
                                                 <span class="text-base font-semibold opacity-70">({{
                                                     analysisResult.hybrid_analysis.threat_score
-                                                    }}%)</span>
+                                                }}%)</span>
                                             </p>
                                         </div>
                                         <div v-else class="text-center">
@@ -1250,7 +1252,7 @@ function prettyJson(value: unknown): string {
                                                 }}
                                                 <span class="text-base font-semibold opacity-70">({{
                                                     analysisResult.hybrid_analysis.av_detect
-                                                    }}/27)</span>
+                                                }}/27)</span>
                                             </p>
                                         </div>
                                         <!-- No av_detect but we have HA results - show as clean (0 detections) -->
@@ -1374,7 +1376,7 @@ function prettyJson(value: unknown): string {
                                 <Network class="h-5 w-5 text-muted-foreground mx-auto mb-1" />
                                 <p class="text-lg font-bold">{{
                                     analysisResult.hybrid_analysis.total_network_connections
-                                    }}</p>
+                                }}</p>
                                 <p class="text-xs text-muted-foreground">Connections</p>
                             </div>
                         </div>
@@ -1426,13 +1428,13 @@ function prettyJson(value: unknown): string {
                                     <span class="font-medium">Submitted as:</span>
                                     <span class="font-mono text-xs">{{
                                         analysisResult.hybrid_analysis.submit_name
-                                        }}</span>
+                                    }}</span>
                                 </div>
                                 <div v-if="analysisResult.hybrid_analysis.environment_description"
                                     class="flex items-center gap-2">
                                     <span class="font-medium">Environment:</span>
                                     <span>{{ analysisResult.hybrid_analysis.environment_description
-                                        }}</span>
+                                    }}</span>
                                 </div>
                                 <div v-if="analysisResult.hybrid_analysis.analysis_start_time"
                                     class="flex items-center gap-2">
@@ -1495,7 +1497,7 @@ function prettyJson(value: unknown): string {
                                             :class="{ 'rotate-90': isJsonNodeExpanded(`raw.${key}`) }" />
                                         <span class="text-foreground">{{ key }}:</span>
                                         <span class="text-muted-foreground">{{ getItemLabel(value)
-                                            }}</span>
+                                        }}</span>
                                     </button>
                                     <!-- Level 2 -->
                                     <div v-if="isJsonNodeExpanded(`raw.${key}`)"
@@ -1511,7 +1513,7 @@ function prettyJson(value: unknown): string {
                                                         <span class="text-foreground">{{ key2 }}:</span>
                                                         <span class="text-muted-foreground">{{
                                                             getItemLabel(val2)
-                                                            }}</span>
+                                                        }}</span>
                                                     </button>
                                                     <!-- Level 3 -->
                                                     <div v-if="isJsonNodeExpanded(`raw.${key}.${key2}`)"
@@ -1529,7 +1531,7 @@ function prettyJson(value: unknown): string {
                                                                             :class="{ 'rotate-90': isJsonNodeExpanded(`raw.${key}.${key2}.${key3}`) }" />
                                                                         <span class="text-foreground">{{
                                                                             key3
-                                                                            }}:</span>
+                                                                        }}:</span>
                                                                         <span class="text-muted-foreground">{{
                                                                             getItemLabel(val3) }}</span>
                                                                     </button>
@@ -1552,7 +1554,7 @@ function prettyJson(value: unknown): string {
                                                                                             key4 }}:</span>
                                                                                         <span
                                                                                             class="text-muted-foreground">{{
-                                                                                            getItemLabel(val4) }}</span>
+                                                                                                getItemLabel(val4) }}</span>
                                                                                     </button>
                                                                                     <!-- Level 5 -->
                                                                                     <div v-if="isJsonNodeExpanded(`raw.${key}.${key2}.${key3}.${key4}`)"
@@ -1571,11 +1573,11 @@ function prettyJson(value: unknown): string {
                                                                                                             :class="{ 'rotate-90': isJsonNodeExpanded(`raw.${key}.${key2}.${key3}.${key4}.${key5}`) }" />
                                                                                                         <span
                                                                                                             class="text-foreground">{{
-                                                                                                            key5
+                                                                                                                key5
                                                                                                             }}:</span>
                                                                                                         <span
                                                                                                             class="text-muted-foreground">{{
-                                                                                                            getItemLabel(val5)
+                                                                                                                getItemLabel(val5)
                                                                                                             }}</span>
                                                                                                     </button>
                                                                                                     <!-- Level 6+ - Show as JSON -->
@@ -1590,14 +1592,14 @@ function prettyJson(value: unknown): string {
                                                                                                         class="flex items-start gap-1.5 pl-4">
                                                                                                         <span
                                                                                                             class="text-foreground shrink-0">{{
-                                                                                                            key5
+                                                                                                                key5
                                                                                                             }}:</span>
                                                                                                         <span
                                                                                                             class="text-muted-foreground ml-1 break-all">{{
-                                                                                                            val5 ===
-                                                                                                            null ?
-                                                                                                            'null' :
-                                                                                                            val5
+                                                                                                                val5 ===
+                                                                                                                    null ?
+                                                                                                                    'null' :
+                                                                                                                    val5
                                                                                                             }}</span>
                                                                                                     </div>
                                                                                                 </template>
@@ -1610,11 +1612,11 @@ function prettyJson(value: unknown): string {
                                                                                         class="flex items-start gap-1.5 pl-4">
                                                                                         <span
                                                                                             class="text-foreground shrink-0">{{
-                                                                                            key4 }}:</span>
+                                                                                                key4 }}:</span>
                                                                                         <span
                                                                                             class="text-muted-foreground ml-1 break-all">{{
-                                                                                            val4 === null ? 'null' :
-                                                                                            val4 }}</span>
+                                                                                                val4 === null ? 'null' :
+                                                                                                    val4 }}</span>
                                                                                     </div>
                                                                                 </template>
                                                                             </div>
@@ -1625,7 +1627,7 @@ function prettyJson(value: unknown): string {
                                                                     <div class="flex items-start gap-1.5 pl-4">
                                                                         <span class="text-foreground shrink-0">{{
                                                                             key3
-                                                                            }}:</span>
+                                                                        }}:</span>
                                                                         <span
                                                                             class="text-muted-foreground ml-1 break-all">{{
                                                                                 val3 === null ? 'null' :
@@ -1639,7 +1641,7 @@ function prettyJson(value: unknown): string {
                                                 <template v-else>
                                                     <div class="flex items-start gap-1.5 pl-4">
                                                         <span class="text-foreground shrink-0">{{ key2
-                                                            }}:</span>
+                                                        }}:</span>
                                                         <span class="text-muted-foreground ml-1 break-all">{{
                                                             val2
                                                                 ===

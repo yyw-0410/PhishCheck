@@ -105,7 +105,7 @@ def _create_oauth_login(
 
 
 def _build_oauth_redirect(user, session, provider: str) -> RedirectResponse:
-    """Build redirect response to frontend with session data."""
+    """Build redirect response to frontend with session data and set httpOnly cookie."""
     settings = get_settings()
     frontend_url = f"{settings.frontend_url}/auth/{provider}/callback"
     
@@ -116,7 +116,20 @@ def _build_oauth_redirect(user, session, provider: str) -> RedirectResponse:
         'picture': user.avatar or ''
     })
     
-    return RedirectResponse(url=f"{frontend_url}?{params}")
+    response = RedirectResponse(url=f"{frontend_url}?{params}")
+    
+    # Set httpOnly cookie for OAuth login (same as regular login)
+    response.set_cookie(
+        key=COOKIE_NAME,
+        value=session.token,
+        max_age=COOKIE_MAX_AGE,
+        path="/",
+        httponly=True,
+        secure=settings.environment == "production",
+        samesite="lax"
+    )
+    
+    return response
 
 
 # ============== Email/Password Authentication ==============
@@ -135,6 +148,7 @@ async def register(user_data: UserRegister, response: Response, db: DBSession = 
             key=COOKIE_NAME,
             value=session.token,
             max_age=COOKIE_MAX_AGE,
+            path="/",
             httponly=True,
             secure=settings.environment == "production",
             samesite="lax"
@@ -197,6 +211,7 @@ async def login(user_data: UserLogin, response: Response, db: DBSession = Depend
             key=COOKIE_NAME,
             value=session.token,
             max_age=COOKIE_MAX_AGE,
+            path="/",
             httponly=True,
             secure=settings.environment == "production",
             samesite="lax"
@@ -232,7 +247,7 @@ async def logout(
         auth_service.logout(token)  # Ignore result - session may already be invalid
     
     # Always clear the cookie and return success
-    response.delete_cookie(COOKIE_NAME)
+    response.delete_cookie(COOKIE_NAME, path="/")
     return {"message": "Logged out successfully"}
 
 
