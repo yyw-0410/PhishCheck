@@ -58,11 +58,13 @@ const router = createRouter({
       path: '/auth/microsoft/callback',
       name: 'microsoft-callback',
       component: OAuthCallback,
+      meta: { layout: 'full' },
     },
     {
       path: '/auth/google/callback',
       name: 'google-callback',
       component: OAuthCallback,
+      meta: { layout: 'full' },
     },
     {
       path: '/terms',
