@@ -28,6 +28,10 @@ __pycache__/
 !.env.example
 backend/.env
 
+# Database files (local data - not for git)
+*.db
+backend/*.db
+
 # Logs
 logs/
 *.log

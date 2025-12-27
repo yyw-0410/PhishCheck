@@ -1,10 +1,18 @@
 <script setup lang="ts">
-import { computed } from "vue"
-import { useRoute, RouterLink } from "vue-router"
+import { computed, onMounted } from "vue"
+import { useRoute, useRouter, RouterLink } from "vue-router"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 
 const route = useRoute()
+const router = useRouter()
+
+// Redirect to home if no query params (user typed URL directly)
+onMounted(() => {
+    if (!route.query.success && !route.query.error && !route.query.token) {
+        router.replace('/')
+    }
+})
 
 const success = computed(() => route.query.success === "true")
 const email = computed(() => route.query.email as string || "")

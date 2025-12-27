@@ -402,6 +402,7 @@ export const useChatStore = defineStore('chat', () => {
         headers: {
           'Content-Type': 'application/json'
         },
+        credentials: 'include',  // Send authentication cookies
         body: JSON.stringify({
           query,
           analysis_context,
@@ -470,8 +471,8 @@ export const useChatStore = defineStore('chat', () => {
     try {
       // Fetch both general and analysis questions
       const [generalRes, analysisRes] = await Promise.all([
-        fetch(`${API_BASE_URL}/api/v1/ai/suggestions`),
-        fetch(`${API_BASE_URL}/api/v1/ai/analysis-questions`)
+        fetch(`${API_BASE_URL}/api/v1/ai/suggestions`, { credentials: 'include' }),
+        fetch(`${API_BASE_URL}/api/v1/ai/analysis-questions`, { credentials: 'include' })
       ])
 
       if (generalRes.ok) {

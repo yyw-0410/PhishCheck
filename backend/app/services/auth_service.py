@@ -192,7 +192,14 @@ class AuthService:
         ip_address: str = None, 
         user_agent: str = None
     ) -> Session:
-        """Create a new session for a user."""
+        """Create a new session for a user.
+        
+        Cleans up old sessions for this user before creating a new one.
+        Only one active session per user is allowed.
+        """
+        # Clean up old sessions for this user (keep only 1 session per user)
+        self.db.query(Session).filter(Session.user_id == user.id).delete()
+        
         session = Session(
             user_id=user.id,
             token=self.generate_session_token(),
