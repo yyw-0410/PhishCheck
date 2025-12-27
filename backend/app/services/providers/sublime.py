@@ -20,13 +20,6 @@ from app.schemas import SublimeMDM, URLScanSubmission
 
 logger = logging.getLogger(__name__)
 
-# Download extensions that are not suitable for ML analysis
-DOWNLOAD_EXTENSIONS = (
-    '.exe', '.scr', '.bat', '.cmd', '.msi', '.dll', '.zip', '.rar', '.7z',
-    '.tar', '.gz', '.iso', '.dmg', '.apk', '.jar', '.ps1', '.vbs', '.js',
-    '.hta', '.docm', '.xlsm', '.pptm'
-)
-
 
 def _normalize_url(url: Optional[str]) -> Optional[str]:
     """Validate and clean up extracted URLs.
