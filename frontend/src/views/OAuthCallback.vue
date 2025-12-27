@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRouter, useRoute, RouterLink } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { Button } from '@/components/ui/button'
 
 const router = useRouter()
 const route = useRoute()
@@ -35,12 +36,7 @@ onMounted(async () => {
         })
 
         status.value = 'success'
-        message.value = 'Successfully authenticated! Redirecting...'
-
-        // Redirect to EML analyzer after 2 seconds
-        setTimeout(() => {
-            router.push('/analyzer/eml')
-        }, 2000)
+        message.value = 'You are now logged in.'
 
     } catch (error) {
         status.value = 'error'
@@ -82,14 +78,10 @@ onMounted(async () => {
                         </svg>
                     </div>
                     <h2 class="text-xl font-semibold text-green-500">Authentication Successful!</h2>
-                    <p class="text-sm text-muted-foreground">Redirecting you to the app...</p>
-                    <div class="flex justify-center gap-1 pt-2">
-                        <div class="w-2 h-2 bg-primary rounded-full animate-bounce" style="animation-delay: 0ms"></div>
-                        <div class="w-2 h-2 bg-primary rounded-full animate-bounce" style="animation-delay: 150ms">
-                        </div>
-                        <div class="w-2 h-2 bg-primary rounded-full animate-bounce" style="animation-delay: 300ms">
-                        </div>
-                    </div>
+                    <p class="text-sm text-muted-foreground">{{ message }}</p>
+                    <RouterLink to="/">
+                        <Button class="w-full mt-4">Continue to App</Button>
+                    </RouterLink>
                 </div>
 
                 <!-- Error State -->
