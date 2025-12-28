@@ -198,7 +198,7 @@ PhishCheck/
 |   |-- vitest.config.ts              # Vitest config (unit tests)
 |-- docs/
 |   |-- uml/
-|   |   |-- use-case.puml             # UML use case diagram (PlantUML)
+|   |   |-- system-diagram.puml       # System architecture diagram (PlantUML)
 |-- Project_Structure.md              # This file
 |-- README.md                         # Project README
 |-- schema.sql                        # Database schema SQL

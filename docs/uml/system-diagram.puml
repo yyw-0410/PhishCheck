@@ -1,0 +1,67 @@
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam ArrowColor #1f2937
+skinparam ActorBorderColor #1f2937
+skinparam ActorFontColor #111827
+skinparam ComponentBorderColor #1f2937
+skinparam ComponentFontColor #111827
+skinparam DatabaseBorderColor #1f2937
+skinparam DatabaseFontColor #111827
+skinparam NodeBorderColor #1f2937
+skinparam NodeFontColor #111827
+title PhishCheck System Diagram
+
+actor User
+
+rectangle "Frontend (Vue 3 SPA)\nAxios + Pinia + Vue Router" as Frontend {
+  component "Views & Components\n(Analysis, Link, File, Chat,\nAuth, Account)" as UI
+  component "State & Services\n(Pinia stores, api.ts)" as State
+}
+
+node "Backend (FastAPI)" as Backend {
+  component "API Routers\n/analysis, /auth, /ai, /health" as Routers
+  component "Service Layer\nAnalysis pipeline, Auth,\nThreat intel, RAG, QR scanner" as Services
+  component "Middleware\nSecurity headers, Rate limiting" as Middleware
+  database "SQLite\nphishcheck.db" as DB
+  component "Scheduler\n(APScheduler cleanup)" as Scheduler
+}
+
+cloud "Threat Intelligence Providers" as ThreatIntel {
+  [Sublime Security]
+  [VirusTotal]
+  [URLscan.io]
+  [IPQS]
+  [Hybrid Analysis]
+}
+
+cloud "AI & Communications" as AIComm {
+  [Google Gemini\n(RAG responses)]
+  [Resend\n(Email verification)]
+}
+
+cloud "OAuth Identity" as OAuth {
+  [Google OAuth]
+  [Microsoft OAuth]
+}
+
+User --> Frontend : Uses web UI
+Frontend --> UI
+Frontend --> State
+State --> Routers : HTTPS (JSON)
+UI --> State
+
+Routers --> Services
+Services --> DB : Sessions, rate limits,\nanalysis records
+Services --> ThreatIntel : API lookups
+Services --> AIComm : AI replies,\nverification emails
+Services --> OAuth : Login & callbacks
+Middleware -[hidden]-> Routers
+Scheduler --> DB : Cleanup & resets
+
+note bottom of ThreatIntel
+  External reputation and sandbox providers
+  used during link/file/email analysis
+end note
+
+@enduml
