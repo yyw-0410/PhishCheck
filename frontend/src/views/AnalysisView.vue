@@ -161,6 +161,17 @@ const hybridAnalysisSummary = computed(() => {
 const threatIntelAlerts = computed(() => {
   const alerts: { url: string; sublimeLabel: string; urlscanVerdict: string; vtDetections: number }[] = []
   const scans = urlscanSubmissions.value || []
+  const vtUrlDetections = new Map<string, number>()
+  const vtDomainDetections = new Map<string, number>()
+
+  for (const summary of virusTotalSummaries.value) {
+    const detections = (summary.stats?.malicious ?? 0) + (summary.stats?.suspicious ?? 0)
+    if (summary.indicator_type === 'url') {
+      vtUrlDetections.set(summary.indicator, detections)
+    } else if (summary.indicator_type === 'domain') {
+      vtDomainDetections.set(summary.indicator.toLowerCase(), detections)
+    }
+  }
 
   for (const scan of scans) {
     const sublimeLabel = (scan.ml_link?.label || '').toLowerCase()
@@ -171,11 +182,28 @@ const threatIntelAlerts = computed(() => {
     const urlscanClean = urlscanVerd === 'benign' || urlscanVerd === ''
 
     if (sublimeFlagged && urlscanClean) {
+      let vtDetections = 0
+      if (scan.url) {
+        const urlDetections = vtUrlDetections.get(scan.url)
+        if (urlDetections !== undefined) {
+          vtDetections = urlDetections
+        } else {
+          try {
+            const domain = new URL(scan.url).hostname.replace(/^www\./, '').toLowerCase()
+            const domainDetections = vtDomainDetections.get(domain)
+            if (domainDetections !== undefined) {
+              vtDetections = domainDetections
+            }
+          } catch {
+            // Ignore invalid URL parsing
+          }
+        }
+      }
       alerts.push({
         url: scan.url || 'Unknown URL',
         sublimeLabel: sublimeLabel,
         urlscanVerdict: urlscanVerd || 'pending',
-        vtDetections: 0 // TODO: cross-reference with VT results
+        vtDetections
       })
     }
   }
