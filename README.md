@@ -145,42 +145,49 @@ PhishCheck/
 
 ## Testing
 
-### Backend Tests (23 tests)
+### Backend Tests (39 tests)
 
 ```bash
 cd backend
+
+# Run all unit tests
+python -m pytest tests/test_unit_cases.py -v
 
 # Run all tests
 pytest
 
 # Run with coverage
 pytest --cov=app --cov-report=html
-
-# Run specific test file
-pytest tests/test_auth_service.py -v
 ```
 
-**Test Coverage**:
-- API endpoints (health check, auth)
-- Authentication service (password hashing, sessions, email validation, OAuth)
-- Email parser (multipart emails, HTML sanitization)
-- Sublime API integration
-- Schema validation
+**Test Files**:
+- `test_unit_cases.py` - Main unit tests (TC-01 to TC-39)
+- `test_auth_service.py` - Authentication service tests
+- `test_email_parser.py` - Email parsing tests
+- `test_threat_intel.py` - Threat intelligence provider tests
+- `test_rag_service.py` - AI/RAG service tests
+- `test_api_endpoints.py` - API endpoint tests
+- `test_sublime_client.py` - Sublime API client tests
+- `test_sublime_mdm.py` - Sublime MDM schema tests
+- `test_app.py` - Application startup tests
 
-### Frontend Tests (Infrastructure configured)
+### Frontend Tests (18 tests)
 
 ```bash
 cd frontend
 
-# Test infrastructure configured (minimal test implementation)
-npm run test:unit  # Vitest
-npm run test:e2e   # Playwright
+# Run unit tests
+npm run test:unit -- --run
 
-# Run linter
-npm run lint
+# Run e2e tests
+npm run test:e2e
 ```
 
-**Note**: Frontend test infrastructure (Vitest, Playwright) is configured for future development. Primary testing focus has been on backend logic given the prototype nature of this project.
+**Test Files**:
+- `views/__tests__/ViewTests.spec.ts` - View component tests
+- `views/__tests__/AnalysisView.spec.ts` - Analysis view tests
+- `views/__tests__/LoginView.spec.ts` - Login view tests
+- `stores/__tests__/stores.spec.ts` - Pinia store tests
 
 ## Future Enhancements
 

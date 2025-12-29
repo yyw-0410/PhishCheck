@@ -81,11 +81,15 @@ PhishCheck/
 |   |   |-- main.py                   # FastAPI application factory
 |   |-- tests/                        # Backend tests (pytest)
 |   |   |-- __init__.py
-|   |   |-- test_app.py
-|   |   |-- test_auth_service.py
-|   |   |-- test_email_parser.py
-|   |   |-- test_sublime_client.py
-|   |   |-- test_sublime_mdm.py
+|   |   |-- test_unit_cases.py        # Main unit tests (TC-01 to TC-39)
+|   |   |-- test_auth_service.py      # Authentication service tests
+|   |   |-- test_email_parser.py      # Email parsing tests
+|   |   |-- test_threat_intel.py      # Threat intelligence tests
+|   |   |-- test_rag_service.py       # AI/RAG service tests
+|   |   |-- test_api_endpoints.py     # API endpoint tests
+|   |   |-- test_sublime_client.py    # Sublime API client tests
+|   |   |-- test_sublime_mdm.py       # Sublime MDM schema tests
+|   |   |-- test_app.py               # Application startup tests
 |   |-- scripts/                      # Utility scripts
 |   |   |-- cleanup.py                # Cleanup script (also runs at midnight)
 |   |   |-- run_sublime.py            # Test Sublime API
@@ -99,6 +103,10 @@ PhishCheck/
 |-- frontend/                         # Vue 3 + TypeScript frontend
 |   |-- src/
 |   |   |-- views/                    # Page components
+|   |   |   |-- __tests__/            # View unit tests (Vitest)
+|   |   |   |   |-- ViewTests.spec.ts
+|   |   |   |   |-- AnalysisView.spec.ts
+|   |   |   |   |-- LoginView.spec.ts
 |   |   |   |-- AnalysisView.vue
 |   |   |   |-- LinkAnalysisView.vue
 |   |   |   |-- FileAnalysisView.vue
@@ -155,6 +163,8 @@ PhishCheck/
 |   |   |       |-- switch/
 |   |   |       |-- tooltip/
 |   |   |-- stores/                   # Pinia state management
+|   |   |   |-- __tests__/            # Store unit tests (Vitest)
+|   |   |   |   |-- stores.spec.ts
 |   |   |   |-- analysis.ts
 |   |   |   |-- auth.ts
 |   |   |   |-- chat.ts
