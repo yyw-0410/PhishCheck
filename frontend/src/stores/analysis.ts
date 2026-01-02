@@ -158,6 +158,46 @@ export const useAnalysisStore = defineStore('analysis', () => {
                 return ext || a.content_type
             }).filter(Boolean)
 
+            // Extract IPQS data (aggregated)
+            let ipqsMaxFraudScore: number | null = null
+            const ipqsFlags: string[] = []
+            if (result.threat_intel?.ipqs?.length) {
+                for (const ipqs of result.threat_intel.ipqs) {
+                    if (ipqs.fraud_score != null && (ipqsMaxFraudScore === null || ipqs.fraud_score > ipqsMaxFraudScore)) {
+                        ipqsMaxFraudScore = ipqs.fraud_score
+                    }
+                    if (ipqs.is_vpn) ipqsFlags.push('vpn')
+                    if (ipqs.is_tor) ipqsFlags.push('tor')
+                    if (ipqs.is_proxy) ipqsFlags.push('proxy')
+                    if (ipqs.is_bot) ipqsFlags.push('bot')
+                    if (ipqs.recent_abuse) ipqsFlags.push('recent_abuse')
+                }
+            }
+            const uniqueIpqsFlags = [...new Set(ipqsFlags)]
+
+            // Extract URLScan data (aggregated)
+            let urlscanVerdict: string | null = null
+            const urlscanTags: string[] = []
+            if (result.threat_intel?.urlscan?.length) {
+                for (const us of result.threat_intel.urlscan) {
+                    if (us.verdict) urlscanVerdict = us.verdict
+                    if (us.tags) urlscanTags.push(...us.tags)
+                }
+            }
+            const uniqueUrlscanTags = [...new Set(urlscanTags)]
+
+            // Extract Hybrid Analysis data (aggregated)
+            let haMaxThreatScore: number | null = null
+            let haVerdict: string | null = null
+            if (result.threat_intel?.hybrid_analysis?.length) {
+                for (const ha of result.threat_intel.hybrid_analysis) {
+                    if (ha.threat_score != null && (haMaxThreatScore === null || ha.threat_score > haMaxThreatScore)) {
+                        haMaxThreatScore = ha.threat_score
+                    }
+                    if (ha.verdict) haVerdict = ha.verdict
+                }
+            }
+
             const response = await fetch(`${API_BASE_URL}/api/v1/ai/recommendation`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -171,7 +211,14 @@ export const useAnalysisStore = defineStore('analysis', () => {
                     sender_domain: senderDomain,
                     subject: subject,
                     has_attachments: hasAttachments,
-                    attachment_types: attachmentTypes
+                    attachment_types: attachmentTypes,
+                    // New threat intel fields
+                    ipqs_max_fraud_score: ipqsMaxFraudScore,
+                    ipqs_flags: uniqueIpqsFlags.length > 0 ? uniqueIpqsFlags : null,
+                    urlscan_verdict: urlscanVerdict,
+                    urlscan_tags: uniqueUrlscanTags.length > 0 ? uniqueUrlscanTags : null,
+                    ha_max_threat_score: haMaxThreatScore,
+                    ha_verdict: haVerdict
                 })
             })
 

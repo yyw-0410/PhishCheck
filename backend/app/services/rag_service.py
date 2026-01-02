@@ -160,10 +160,8 @@ class RAGService:
     def _build_prompt(self, query: str, analysis_context: Optional[Dict[str, Any]] = None) -> str:
         """Build the prompt for Gemini with analysis context (with PII redaction)."""
         
-        # Get relevant knowledge based on query (only if no analysis context)
-        knowledge_text = ""
-        if not analysis_context:
-            knowledge_text = self._get_relevant_knowledge(query)
+        # Always get relevant knowledge based on query (for grounding responses)
+        knowledge_text = self._get_relevant_knowledge(query)
         
         # Format analysis context if provided
         context_text = ""
@@ -196,11 +194,15 @@ class RAGService:
         # Email metadata (with PII redaction)
         if analysis_context.get("emailMetadata"):
             meta = analysis_context["emailMetadata"]
+            # Apply PII redaction to protect user privacy
+            redacted_subject = self._redact_subject(meta.get('subject', ''))
+            redacted_from = self._redact_email(meta.get('from', ''))
+            redacted_to = self._redact_email(meta.get('to', ''))
             context_text += f"""
 ### Email Metadata:
-- **Subject:** {meta.get('subject', 'N/A')}
-- **From:** {meta.get('from', 'N/A')}
-- **To:** {meta.get('to', 'N/A')}
+- **Subject:** {redacted_subject}
+- **From:** {redacted_from}
+- **To:** {redacted_to}
 - **Date:** {meta.get('date', 'N/A')}
 """
         
@@ -223,14 +225,16 @@ class RAGService:
                 size_kb = round(att.get('size', 0) / 1024, 1)
                 context_text += f"- `{att.get('filename', 'Unknown')}` ({att.get('contentType', 'Unknown')}, {size_kb}KB)\n"
         
-        # Links found in body
+        # Links found in body (with URL path redaction)
         if analysis_context.get("bodyLinks"):
             links = analysis_context["bodyLinks"]
             context_text += f"\n### Links in Email Body ({len(links)}):\n"
             for link in links[:10]:
                 text = link.get('text', '')[:50]
                 href = link.get('href', 'Unknown')
-                context_text += f"- [{text or 'Link'}]({href})\n"
+                # Redact URL paths to protect privacy while keeping domain for threat analysis
+                redacted_href = self._redact_url(href) if href != 'Unknown' else href
+                context_text += f"- [{text or 'Link'}]({redacted_href})\n"
         
         # Authentication results
         if analysis_context.get("authentication"):
@@ -434,10 +438,11 @@ class RAGService:
         client = await self._get_client()
         
         # Try models in order - newest to oldest
+        # use_search=True enables Google Search grounding for real-time info
         models_to_try = [
-            ("gemini-3-flash-preview", False),    # Gemini 3 (newest)
-            ("gemini-2.5-flash", False),          # Stable fallback
-            ("gemini-2.0-flash", False),          # Legacy fallback
+            ("gemini-3-flash-preview", True),     # Gemini 3 (newest) with Google Search
+            ("gemini-2.5-flash", True),           # Stable fallback with Google Search
+            ("gemini-2.0-flash", False),          # Legacy fallback (no grounding)
         ]
         
         last_error = None

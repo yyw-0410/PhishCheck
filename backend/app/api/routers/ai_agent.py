@@ -173,6 +173,12 @@ Email Analysis Summary:
 - VirusTotal: {vt_mal} malicious, {vt_sus} suspicious detections
 - Has Attachments: {request.has_attachments or False}
 - Attachment Types: {', '.join(request.attachment_types) if request.attachment_types else 'None'}
+- IPQS Fraud Score: {request.ipqs_max_fraud_score or 'N/A'}/100
+- IPQS Flags: {', '.join(request.ipqs_flags) if request.ipqs_flags else 'None'}
+- URLScan Verdict: {request.urlscan_verdict or 'N/A'}
+- URLScan Tags: {', '.join(request.urlscan_tags) if request.urlscan_tags else 'None'}
+- Hybrid Analysis Threat Score: {request.ha_max_threat_score or 'N/A'}/100
+- Hybrid Analysis Verdict: {request.ha_verdict or 'N/A'}
 """
         
         prompt = f"""You are a cybersecurity expert analyzing email threats. Based on the following analysis results, provide a brief, actionable recommendation.

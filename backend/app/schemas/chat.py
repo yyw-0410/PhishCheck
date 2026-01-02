@@ -71,6 +71,15 @@ class AnalysisRecommendationRequest(BaseModel):
     subject: Optional[str] = Field(None, description="Email subject")
     has_attachments: Optional[bool] = Field(None, description="Whether email has attachments")
     attachment_types: Optional[List[str]] = Field(None, description="List of attachment file extensions")
+    # IPQS threat intel
+    ipqs_max_fraud_score: Optional[int] = Field(None, description="Highest IPQS fraud score from sender IPs (0-100)")
+    ipqs_flags: Optional[List[str]] = Field(None, description="IPQS flags: vpn, tor, proxy, bot, recent_abuse")
+    # URLScan threat intel
+    urlscan_verdict: Optional[str] = Field(None, description="URLScan verdict: malicious, suspicious, safe")
+    urlscan_tags: Optional[List[str]] = Field(None, description="URLScan tags: phishing, malware, etc.")
+    # Hybrid Analysis threat intel
+    ha_max_threat_score: Optional[int] = Field(None, description="Highest Hybrid Analysis threat score (0-100)")
+    ha_verdict: Optional[str] = Field(None, description="Hybrid Analysis verdict: malicious, suspicious, no_threat")
 
 
 class AnalysisRecommendationResponse(BaseModel):
