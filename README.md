@@ -23,6 +23,11 @@ A full-stack phishing detection platform that analyzes emails and URLs using mul
 | Styling | Tailwind CSS + Shadcn/vue |
 | AI | Google Gemini API |
 
+## System Diagram
+
+- High-level architecture: [`docs/uml/system-diagram.puml`](docs/uml/system-diagram.puml) (PlantUML)
+- Render locally with `plantuml docs/uml/system-diagram.puml` or use the PlantUML VS Code extension.
+
 ## Quick Start
 
 ### Prerequisites
