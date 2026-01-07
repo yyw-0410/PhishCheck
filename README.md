@@ -184,10 +184,8 @@ npm run test:e2e
 ```
 
 **Test Files**:
-- `views/__tests__/ViewTests.spec.ts` - View component tests
-- `views/__tests__/AnalysisView.spec.ts` - Analysis view tests
-- `views/__tests__/LoginView.spec.ts` - Login view tests
-- `stores/__tests__/stores.spec.ts` - Pinia store tests
+- `views/__tests__/*.spec.ts` - View component tests (16 files)
+- `stores/__tests__/*.spec.ts` - Pinia store tests (2 files)
 
 ## Future Enhancements
 

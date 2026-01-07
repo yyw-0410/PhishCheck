@@ -76,6 +76,14 @@ export const useAnalysisStore = defineStore('analysis', () => {
         aiRecommendationLoading.value = false
     }
 
+    // Reset all analysis results (used on logout)
+    function resetAll() {
+        reset()
+        linkAnalysisResult.value = null
+        fileAnalysisResult.value = null
+        activeAnalysisType.value = null
+    }
+
     function setAnalysisResult(result: CombinedAnalysisResult) {
         analysisResult.value = result
         activeAnalysisType.value = 'email'
@@ -201,6 +209,7 @@ export const useAnalysisStore = defineStore('analysis', () => {
             const response = await fetch(`${API_BASE_URL}/api/v1/ai/recommendation`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
                 body: JSON.stringify({
                     attack_score: attackScore,
                     verdict: verdict,
@@ -247,6 +256,7 @@ export const useAnalysisStore = defineStore('analysis', () => {
         aiRecommendation,
         aiRecommendationLoading,
         reset,
+        resetAll,
         setAnalysisResult,
         setLinkAnalysisResult,
         setFileAnalysisResult,

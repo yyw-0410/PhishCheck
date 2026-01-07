@@ -412,7 +412,7 @@ export function useThreatIntel(analysisResult: Ref<CombinedAnalysisResult | null
 
     try {
 
-      const resp = await fetch(`${API_BASE_URL}/api/v1/analysis/urlscan/${encodeURIComponent(scanId)}`)
+      const resp = await fetch(`${API_BASE_URL}/api/v1/analysis/urlscan/${encodeURIComponent(scanId)}`, { credentials: 'include' })
       if (!resp.ok) {
         const detail = await resp.text()
         throw new Error(`Refresh failed: ${resp.status} ${detail}`)
@@ -462,6 +462,7 @@ export function useThreatIntel(analysisResult: Ref<CombinedAnalysisResult | null
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url }),
+        credentials: 'include',
       })
       if (!resp.ok) {
         const detail = await resp.text()

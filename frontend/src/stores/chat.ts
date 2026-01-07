@@ -56,9 +56,44 @@ export const useChatStore = defineStore('chat', () => {
 
   const hasMessages = computed(() => messages.value.length > 0)
 
-  // Get current questions based on mode
+  // Analysis-type-specific questions
+  const emailQuestions = [
+    'Is this email safe?',
+    'What threats were detected?',
+    'Explain the authentication results (SPF/DKIM/DMARC)',
+    'What should I do about this email?'
+  ]
+
+  const linkQuestions = [
+    'Is this URL safe to visit?',
+    'What threats were detected in this link?',
+    'Why is this link flagged as suspicious?',
+    'What do the VirusTotal results mean?'
+  ]
+
+  const fileQuestions = [
+    'Is this file safe?',
+    'What malware was detected?',
+    'What does the Hybrid Analysis show?',
+    'Should I delete this file?'
+  ]
+
+  // Get current questions based on mode and analysis type
   const currentQuestions = computed(() => {
-    return chatMode.value === 'analysis' ? analysisQuestions.value : suggestedQuestions.value
+    if (chatMode.value === 'general') {
+      return suggestedQuestions.value
+    }
+
+    // Return analysis-type-specific questions
+    const analysisStore = useAnalysisStore()
+    const activeType = analysisStore.activeAnalysisType
+
+    if (activeType === 'email') return emailQuestions
+    if (activeType === 'link') return linkQuestions
+    if (activeType === 'file') return fileQuestions
+
+    // Fallback to generic analysis questions
+    return analysisQuestions.value
   })
 
   const generateId = () => {
@@ -90,19 +125,31 @@ export const useChatStore = defineStore('chat', () => {
   const buildAnalysisContext = () => {
     const analysisStore = useAnalysisStore()
 
-    // Check for email analysis first
-    if (analysisStore.analysisResult) {
-      return buildEmailContext(analysisStore.analysisResult)
+    // Use activeAnalysisType to determine which context to build
+    // This ensures we return the context for the current analysis page
+    const activeType = analysisStore.activeAnalysisType
+
+    if (activeType === 'file' && analysisStore.fileAnalysisResult) {
+      return buildFileContext(analysisStore.fileAnalysisResult)
     }
 
-    // Check for link analysis
-    if (analysisStore.linkAnalysisResult) {
+    if (activeType === 'link' && analysisStore.linkAnalysisResult) {
       return buildLinkContext(analysisStore.linkAnalysisResult)
     }
 
-    // Check for file analysis
+    if (activeType === 'email' && analysisStore.analysisResult) {
+      return buildEmailContext(analysisStore.analysisResult)
+    }
+
+    // Fallback: check in priority order if activeType is null
     if (analysisStore.fileAnalysisResult) {
       return buildFileContext(analysisStore.fileAnalysisResult)
+    }
+    if (analysisStore.linkAnalysisResult) {
+      return buildLinkContext(analysisStore.linkAnalysisResult)
+    }
+    if (analysisStore.analysisResult) {
+      return buildEmailContext(analysisStore.analysisResult)
     }
 
     return null
@@ -356,7 +403,6 @@ export const useChatStore = defineStore('chat', () => {
         reportUrl: ha.report_url
       }
     }
-
     return context
   }
 
@@ -388,8 +434,14 @@ export const useChatStore = defineStore('chat', () => {
     error.value = null
 
     try {
-      // Build analysis context from current analysis
-      const analysis_context = buildAnalysisContext()
+      // Build analysis context from current analysis (with error handling for complex emails)
+      let analysis_context = null
+      try {
+        analysis_context = buildAnalysisContext()
+      } catch {
+        // Continue without context if building fails
+        analysis_context = null
+      }
 
       // Build conversation history (last 10 messages for context)
       const conversation_history = messages.value.slice(-10).map(m => ({

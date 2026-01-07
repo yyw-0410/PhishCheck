@@ -157,6 +157,30 @@ class RAGService:
         else:
             return '[general/other themed]'
     
+    def _redact_text_pii(self, text: str) -> str:
+        """Redact PII from text content (email body, headers).
+        
+        Redacts:
+        - Email addresses: john@example.com -> [email-redacted]
+        - Phone numbers: 123-456-7890 -> [phone-redacted]
+        - IP addresses: 192.168.1.1 -> [ip-redacted]
+        """
+        if not text:
+            return text
+        
+        import re
+        
+        # Email pattern: name@domain.tld
+        text = re.sub(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', '[email-redacted]', text)
+        
+        # Phone patterns: various formats
+        text = re.sub(r'\+?1?[-.]?\(?\d{3}\)?[-.]?\d{3}[-.]?\d{4}', '[phone-redacted]', text)
+        
+        # IP addresses: IPv4
+        text = re.sub(r'\b(?:\d{1,3}\.){3}\d{1,3}\b', '[ip-redacted]', text)
+        
+        return text
+    
     def _build_prompt(self, query: str, analysis_context: Optional[Dict[str, Any]] = None) -> str:
         """Build the prompt for Gemini with analysis context (with PII redaction)."""
         
@@ -174,8 +198,14 @@ class RAGService:
             else:
                 context_text = self._build_email_context(analysis_context)
 
-        # Simple, concise prompt
-        parts = ["You are PhishCheck AI, a security analysis assistant. Be concise."]
+        # Simple, concise prompt with guidance on risk assessment
+        parts = ['''You are PhishCheck AI, a security analysis assistant. Be concise.
+
+IMPORTANT: When assessing email safety:
+- Attack Score (0-100) is the PRIMARY indicator from ML analysis
+- VT/VirusTotal detections are SECONDARY - single detections (1-2) are often FALSE POSITIVES
+- Low attack score (0-20) with few VT detections = likely SAFE/legitimate
+- Only flag as dangerous if attack score is high (40+) OR many VT detections (3+)''']
         
         if knowledge_text:
             parts.append(f"\nKnowledge:\n{knowledge_text}")
@@ -206,16 +236,18 @@ class RAGService:
 - **Date:** {meta.get('date', 'N/A')}
 """
         
-        # Email body (already truncated by frontend)
+        # Email body (with PII redaction)
         if analysis_context.get("emailBody"):
-            context_text += f"\n### Email Body:\n```\n{analysis_context['emailBody']}\n```\n"
+            redacted_body = self._redact_text_pii(analysis_context['emailBody'])
+            context_text += f"\n### Email Body:\n```\n{redacted_body}\n```\n"
         
-        # Important headers
+        # Important headers (with PII redaction)
         if analysis_context.get("headers"):
             headers = analysis_context["headers"]
             context_text += "\n### Important Headers:\n"
             for h in headers[:5]:
-                context_text += f"- **{h.get('name', 'Unknown')}:** {h.get('value', 'N/A')}\n"
+                redacted_value = self._redact_text_pii(h.get('value', 'N/A'))
+                context_text += f"- **{h.get('name', 'Unknown')}:** {redacted_value}\n"
         
         # Attachments
         if analysis_context.get("attachments"):

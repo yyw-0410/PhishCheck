@@ -138,7 +138,7 @@ const refreshUrlscan = async (scanId: string) => {
 
     try {
         console.log(`Refreshing URLscan: ${scanId}`)
-        const resp = await fetch(`${API_BASE_URL}/api/v1/analysis/urlscan/${encodeURIComponent(scanId)}`)
+        const resp = await fetch(`${API_BASE_URL}/api/v1/analysis/urlscan/${encodeURIComponent(scanId)}`, { credentials: 'include' })
         if (!resp.ok) return
 
         const updated = await resp.json()
@@ -244,8 +244,6 @@ onUnmounted(() => {
     stopTimer()
     stopAutoRefresh()
     if (screenshotTimeout) clearTimeout(screenshotTimeout)
-    // Clear link analysis from store when leaving
-    analysisStore.setLinkAnalysisResult(null)
 })
 
 const submitLink = async () => {
@@ -267,6 +265,7 @@ const submitLink = async () => {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({ url: urlInput.value }),
+            credentials: 'include',
         })
 
         if (!response.ok) {

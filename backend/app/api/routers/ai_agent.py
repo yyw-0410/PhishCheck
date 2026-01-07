@@ -63,7 +63,6 @@ async def chat(
             conv_history = [{"role": m.role, "content": m.content} for m in chat_request.conversation_history]
         
         result = await rag_service.ask(chat_request.query, chat_request.analysis_context, conv_history)
-        
         # Increment AI message count for unverified users after successful response
         ctx.increment_usage()
         
@@ -75,7 +74,6 @@ async def chat(
         )
     except Exception as e:
         import traceback
-        print(f"[CHAT ERROR] {type(e).__name__}: {str(e)}")
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Error processing question: {str(e)}")
 
@@ -128,12 +126,13 @@ async def get_analysis_recommendation(request: AnalysisRecommendationRequest):
     rules = request.rule_count or 0
     verdict = (request.verdict or "").lower()
     
-    # Determine risk level
-    if score >= 70 or (score >= 50 and vt_mal >= 2):
+    # Determine risk level based ONLY on attack score (ML analysis is primary)
+    # Threat intel (VT, IPQS, etc.) is enrichment data, not risk driver
+    if score >= 70:
         risk_level = "critical"
-    elif score >= 40 or vt_mal >= 2:
+    elif score >= 40:
         risk_level = "high"
-    elif score >= 20 or vt_mal >= 1 or rules >= 2:
+    elif score >= 20:
         risk_level = "medium"
     else:
         risk_level = "low"
@@ -228,6 +227,7 @@ Rules:
                     text = data.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "")
                     
                     text = text.strip()
+                    # Remove markdown code blocks
                     if text.startswith("```json"):
                         text = text[7:]
                     if text.startswith("```"):
@@ -235,6 +235,12 @@ Rules:
                     if text.endswith("```"):
                         text = text[:-3]
                     text = text.strip()
+                    
+                    # Try to extract JSON object if text has extra content
+                    json_start = text.find("{")
+                    json_end = text.rfind("}") + 1
+                    if json_start >= 0 and json_end > json_start:
+                        text = text[json_start:json_end]
                     
                     try:
                         ai_response = json.loads(text)
@@ -246,7 +252,10 @@ Rules:
                         )
                     except json.JSONDecodeError as e:
                         logger.warning(f"AI Recommendation: JSON parse error from {key_label}: {e}")
-                        break  # Don't retry on JSON error, fall through to rule-based
+                        logger.debug(f"AI Recommendation: Raw text was: {text[:200]}...")
+                        # Don't retry on JSON error - Gemini returned something, just couldn't parse it
+                        # Fall through to rule-based immediately
+                        break
                         
                 elif response.status_code == 429:
                     logger.warning(f"AI Recommendation: {key_label} rate limited (429), trying next key...")
@@ -255,25 +264,18 @@ Rules:
                 else:
                     logger.warning(f"AI Recommendation: {key_label} returned {response.status_code}")
                     continue  # Try next API key on other errors
-                    
             except Exception as e:
                 logger.warning(f"AI Recommendation: {key_label} exception: {type(e).__name__}: {e}")
                 continue  # Try next API key on exception
         
-        logger.warning("AI Recommendation: All API keys exhausted, falling back to rule-based")
+        logger.info("AI Recommendation: Using rule-based fallback")
     
     # Fallback: Rule-based recommendation
     # IMPORTANT: VirusTotal malicious detections should ALWAYS raise the risk level
     # A low attack score with VT malicious detections means the email contains/links to malware
     
-    # Override risk level if VT detected malicious content
-    if vt_mal >= 2:
-        risk_level = "high" if risk_level in ["low", "medium"] else risk_level
-    elif vt_mal >= 1:
-        risk_level = "medium" if risk_level == "low" else risk_level
-    
     # Generate recommendation based on actual threat indicators
-    if vt_mal >= 2:
+    if vt_mal >= 3:
         # Multiple malicious detections = definitely dangerous
         rec = f"Malicious content detected! VirusTotal flagged {vt_mal} indicators. Do not interact with links or attachments."
         actions = [
@@ -282,17 +284,23 @@ Rules:
             "Report to IT/security team",
             "The email may be forwarding/referencing malicious content"
         ]
-        risk_level = "high"
-    elif vt_mal >= 1:
-        # At least one malicious detection
-        rec = f"Warning: VirusTotal detected malicious content. Exercise extreme caution."
+    elif vt_mal >= 2:
+        # Two malicious detections - significant concern
+        rec = f"Warning: VirusTotal detected {vt_mal} malicious indicators. Exercise extreme caution."
         actions = [
             "Avoid clicking links in this email",
             "Do NOT open attachments without verification",
             "Verify sender through another channel",
             "The email may contain or reference malicious content"
         ]
-        risk_level = "medium" if risk_level == "low" else risk_level
+    elif vt_mal >= 1:
+        # Single detection - could be false positive
+        rec = f"Note: VirusTotal flagged 1 indicator. This may be a false positive - verify before taking action."
+        actions = [
+            "Be cautious with links in this email",
+            "Verify sender if unsure",
+            "Single detections are sometimes false positives"
+        ]
     elif risk_level == "critical":
         rec = f"High risk! Attack score {score}/100. Do not interact with this email."
         actions = [

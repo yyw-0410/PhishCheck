@@ -121,6 +121,7 @@ export function useAnalysisState() {
       const response = await fetch(`${API_BASE_URL}/api/v1/analysis/email?${params.toString()}`, {
         method: 'POST',
         body: formData,
+        credentials: 'include',
       })
       if (!response.ok) {
         const details = await response.text()
@@ -185,6 +186,7 @@ export function useAnalysisState() {
     const response = await fetch(`${API_BASE_URL}/api/v1/analysis/email?${params.toString()}`, {
       method: 'POST',
       body: formData,
+      credentials: 'include',
     })
     if (!response.ok) {
       const details = await response.text()

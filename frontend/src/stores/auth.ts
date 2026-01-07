@@ -1,6 +1,8 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { API_BASE_URL } from '@/services/api'
+import { useAnalysisStore } from './analysis'
+import { useChatStore } from './chat'
 
 const API_BASE = `${API_BASE_URL}/api`
 
@@ -181,6 +183,12 @@ export const useAuthStore = defineStore('auth', () => {
             // Ignore errors, clear session anyway
         }
         clearSession()
+
+        // Clear analysis and chat data
+        const analysisStore = useAnalysisStore()
+        const chatStore = useChatStore()
+        analysisStore.resetAll()
+        chatStore.clearChat()
     }
 
     return {

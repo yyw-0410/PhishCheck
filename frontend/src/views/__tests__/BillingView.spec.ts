@@ -2,30 +2,26 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { shallowMount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import { uiStubs } from './testStubs'
-import LoginView from '../LoginView.vue'
+import BillingView from '../BillingView.vue'
 
 vi.mock('vue-router', () => ({
     useRouter: () => ({
-        push: vi.fn(),
+        back: vi.fn(),
     }),
-    RouterLink: {
-        template: '<a><slot /></a>',
-    },
 }))
 
-describe('LoginView', () => {
+describe('BillingView', () => {
     beforeEach(() => {
         setActivePinia(createPinia())
     })
 
-    it('LV1: renders login form inputs', () => {
-        const wrapper = shallowMount(LoginView, {
+    it('BV1: renders billing header', () => {
+        const wrapper = shallowMount(BillingView, {
             global: {
                 stubs: uiStubs,
             },
         })
 
-        expect(wrapper.find('input#email').exists()).toBe(true)
-        expect(wrapper.find('input#password').exists()).toBe(true)
+        expect(wrapper.text()).toContain('Billing & Plans')
     })
 })

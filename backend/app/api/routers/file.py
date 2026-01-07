@@ -96,11 +96,13 @@ def _calculate_file_verdict(result: FileAnalysisResult):
     risk_score = min(100, risk_score)
     
     # Determine final verdict based on score if still ambiguous
-    if verdict == "unknown":
+    if verdict in ("unknown", "clean"):
         if risk_score >= 70:
             verdict = "malicious"
         elif risk_score >= 40:
             verdict = "suspicious"
+        elif risk_score >= 20:
+            verdict = "low_risk"
         else:
             verdict = "clean"
     

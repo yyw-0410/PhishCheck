@@ -64,6 +64,6 @@ class FileAnalysisResult(BaseModel):
     virustotal: Optional[VirusTotalFileResult] = None
     sublime: Optional[SublimeFileResult] = None
     hybrid_analysis: Optional[HybridAnalysisLookup] = None
-    overall_verdict: Optional[str] = None  # malicious, suspicious, clean, unknown
+    overall_verdict: Optional[str] = None  # malicious, suspicious, low_risk, clean, unknown, not_found
     risk_score: Optional[int] = None  # 0-100
     risk_factors: Optional[List[str]] = None  # List of factors contributing to risk score

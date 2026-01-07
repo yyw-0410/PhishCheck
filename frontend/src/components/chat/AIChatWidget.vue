@@ -46,6 +46,7 @@ const checkAiStatus = async () => {
   try {
     const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/v1/ai/suggestions`, {
       method: 'GET',
+      credentials: 'include',
       signal: AbortSignal.timeout(5000) // 5 second timeout
     })
     aiStatus.value = response.ok ? 'online' : 'offline'

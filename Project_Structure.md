@@ -104,9 +104,7 @@ PhishCheck/
 |   |-- src/
 |   |   |-- views/                    # Page components
 |   |   |   |-- __tests__/            # View unit tests (Vitest)
-|   |   |   |   |-- ViewTests.spec.ts
-|   |   |   |   |-- AnalysisView.spec.ts
-|   |   |   |   |-- LoginView.spec.ts
+|   |   |   |   |-- *.spec.ts         # 16 separated test files
 |   |   |   |-- AnalysisView.vue
 |   |   |   |-- LinkAnalysisView.vue
 |   |   |   |-- FileAnalysisView.vue
@@ -164,7 +162,8 @@ PhishCheck/
 |   |   |       |-- tooltip/
 |   |   |-- stores/                   # Pinia state management
 |   |   |   |-- __tests__/            # Store unit tests (Vitest)
-|   |   |   |   |-- stores.spec.ts
+|   |   |   |   |-- analysis.spec.ts  # Analysis store tests
+|   |   |   |   |-- auth.spec.ts      # Auth store tests
 |   |   |   |-- analysis.ts
 |   |   |   |-- auth.ts
 |   |   |   |-- chat.ts

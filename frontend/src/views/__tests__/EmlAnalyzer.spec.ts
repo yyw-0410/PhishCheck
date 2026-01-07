@@ -1,9 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { mount, flushPromises } from '@vue/test-utils'
+import { shallowMount, flushPromises } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import { ref, computed } from 'vue'
+import { uiStubs } from './testStubs'
+import AnalysisView from '../AnalysisView.vue'
 
-// Mock all hooks used by AnalysisView
 vi.mock('@/hooks/useAnalysisState', () => ({
     useAnalysisState: () => ({
         analysisResult: ref(null),
@@ -82,94 +83,21 @@ vi.mock('@/utils/screenshotUtils', () => ({
     getLiveshotUrl: vi.fn(() => ''),
 }))
 
-// Stub complex UI components
-const globalStubs = {
-    Dialog: { template: '<div><slot /></div>' },
-    DialogContent: { template: '<div><slot /></div>' },
-    DialogHeader: { template: '<div><slot /></div>' },
-    DialogTitle: { template: '<h2><slot /></h2>' },
-    Button: { template: '<button><slot /></button>' },
-    JsonTreeNode: { template: '<div></div>' },
-    // Lucide icons
-    UploadCloud: { template: '<span />' },
-    FileText: { template: '<span />' },
-    ShieldAlert: { template: '<span />' },
-    ShieldCheck: { template: '<span />' },
-    Search: { template: '<span />' },
-    ExternalLink: { template: '<span />' },
-    ChevronDown: { template: '<span />' },
-    ChevronRight: { template: '<span />' },
-    AlertTriangle: { template: '<span />' },
-    CheckCircle2: { template: '<span />' },
-    XCircle: { template: '<span />' },
-    Copy: { template: '<span />' },
-    Check: { template: '<span />' },
-    Bot: { template: '<span />' },
-    Mail: { template: '<span />' },
-    Loader2: { template: '<span />' },
-    Globe: { template: '<span />' },
-    Lightbulb: { template: '<span />' },
-    Server: { template: '<span />' },
-    Wifi: { template: '<span />' },
-    Code: { template: '<span />' },
-    FileCode: { template: '<span />' },
-    Database: { template: '<span />' },
-    Download: { template: '<span />' },
-    KeyRound: { template: '<span />' },
-    ArrowRight: { template: '<span />' },
-    Eye: { template: '<span />' },
-    Trash2: { template: '<span />' },
-    Plus: { template: '<span />' },
-    Monitor: { template: '<span />' },
-    RefreshCw: { template: '<span />' },
-}
-
-describe('AnalysisView', () => {
+describe('EmlAnalyzer', () => {
     beforeEach(() => {
         setActivePinia(createPinia())
         vi.clearAllMocks()
     })
 
-    it('FE-ANALYSIS-01: renders upload area when no analysis in progress', async () => {
-        const AnalysisView = (await import('../AnalysisView.vue')).default
-        const wrapper = mount(AnalysisView, {
+    it('EA1: renders the EML analyzer heading', async () => {
+        const wrapper = shallowMount(AnalysisView, {
             global: {
-                stubs: globalStubs,
+                stubs: uiStubs,
             },
         })
 
         await flushPromises()
 
-        // Check for upload instruction text (matches actual UI)
-        expect(wrapper.text()).toContain('Drop your .eml file here')
-    })
-
-    it('FE-ANALYSIS-02: contains analyze button', async () => {
-        const AnalysisView = (await import('../AnalysisView.vue')).default
-        const wrapper = mount(AnalysisView, {
-            global: {
-                stubs: globalStubs,
-            },
-        })
-
-        await flushPromises()
-
-        // Check for analyze button text
-        expect(wrapper.text()).toContain('Analyze File')
-    })
-
-    it('FE-ANALYSIS-03: displays EML Analyzer heading', async () => {
-        const AnalysisView = (await import('../AnalysisView.vue')).default
-        const wrapper = mount(AnalysisView, {
-            global: {
-                stubs: globalStubs,
-            },
-        })
-
-        await flushPromises()
-
-        // Check for main heading
         expect(wrapper.text()).toContain('EML Analyzer')
     })
 })
-

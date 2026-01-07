@@ -83,8 +83,6 @@ function stopTimer() {
 
 onUnmounted(() => {
     stopTimer()
-    // Clear file analysis from store when leaving
-    analysisStore.setFileAnalysisResult(null)
 })
 
 // Trigger file dialog
