@@ -7,6 +7,7 @@ import logging
 from typing import List, Optional
 from urllib.parse import urlparse
 
+import time
 from PIL import Image
 from pyzbar import pyzbar
 from pyzbar.pyzbar import Decoded
@@ -30,11 +31,29 @@ class QRCodeScanner:
         urls: List[str] = []
         
         try:
+            start_time = time.time()
+            
             # Open image with PIL
             image = Image.open(io.BytesIO(image_data))
             
+            # Optimization 1: Resize if too large (max 2000x2000)
+            # 4K images (approx 4000x3000) take ~12x longer to scan than 1000px
+            max_dim = 2000
+            if image.width > max_dim or image.height > max_dim:
+                image.thumbnail((max_dim, max_dim))
+                
+            # Optimization 2: Convert to grayscale
+            # pyzbar converts to grayscale internally anyway, but doing it in PIL is faster
+            # and reduces memory usage for the subsequent decode call
+            if image.mode != 'L':
+                image = image.convert('L')
+            
             # Decode all barcodes/QR codes in the image
             decoded_objects: List[Decoded] = pyzbar.decode(image)
+            
+            scan_duration = time.time() - start_time
+            if scan_duration > 0.5:
+                logger.debug(f"QR scan took {scan_duration:.2f}s")
             
             for obj in decoded_objects:
                 # Get the data from the QR/barcode

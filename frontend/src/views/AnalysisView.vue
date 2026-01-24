@@ -33,6 +33,7 @@ import {
   Plus,
   Monitor,
   RefreshCw,
+  QrCode,
 } from 'lucide-vue-next'
 
 import type { UrlscanSubmission } from '@/types/analysis'
@@ -109,7 +110,33 @@ const {
   hybridAnalysisResults,
 } = useThreatIntel(analysisResult)
 
-const { attachmentSummary, senderDetails, emailContent, rawTextBody, rawHtmlBody, rawEmlContent, mdmData } = useParsedEmail(analysisResult)
+const { attachmentSummary, senderDetails, emailContent, rawTextBody, rawHtmlBody, processedHtmlBody, rawEmlContent, mdmData } = useParsedEmail(analysisResult)
+
+// Link source detection (QR, HTML, PDF, etc.)
+const linkContextMap = computed(() => {
+  const links = (analysisResult.value?.parsed_email?.links ?? []) as any[]
+  const map = new Map<string, string>()
+  for (const link of links) {
+    if (link.href && link.context) {
+      // Normalize context to a tag type
+      let type = 'BODY'
+      const ctx = link.context.toLowerCase()
+
+      if (ctx.includes('qr code')) type = 'QR'
+      else if (ctx.includes('html body')) type = 'HTML'
+      else if (ctx.includes('plain text')) type = 'TEXT'
+      else type = 'BODY'
+
+      map.set(link.href, type)
+    }
+  }
+  return map
+})
+
+function getLinkSource(url: string | null | undefined): string | null {
+  if (!url) return null
+  return linkContextMap.value.get(url) || null
+}
 
 // Tab state for Message Content views
 const activeMessageTab = ref<'user' | 'text' | 'html' | 'eml' | 'mdm'>('user')
@@ -117,9 +144,9 @@ const activeMessageTab = ref<'user' | 'text' | 'html' | 'eml' | 'mdm'>('user')
 // Sanitized HTML for safe rendering in User View (display only, no clickable links)
 // Security: Links disabled, scripts blocked, but images allowed for better viewing
 const sanitizedHtml = computed(() => {
-  if (!rawHtmlBody.value) return ''
+  if (!processedHtmlBody.value) return ''
   // Use DOMPurify for proper XSS protection
-  const clean = DOMPurify.sanitize(rawHtmlBody.value, {
+  const clean = DOMPurify.sanitize(processedHtmlBody.value, {
     ALLOWED_TAGS: ['p', 'br', 'div', 'span', 'b', 'i', 'u', 'strong', 'em', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
       'ul', 'ol', 'li', 'table', 'thead', 'tbody', 'tr', 'td', 'th', 'blockquote', 'pre', 'code', 'hr', 'img', 'center', 'font'],
     ALLOWED_ATTR: ['class', 'alt', 'width', 'height', 'colspan', 'rowspan', 'align', 'valign', 'bgcolor', 'color', 'size', 'src', 'style'],
@@ -1569,7 +1596,32 @@ const SEVERITY_FILTERS = ['ALL', 'HIGH', 'MEDIUM', 'LOW', 'INFO'] as const
                   <div class="flex-1 min-w-0 flex flex-col">
                     <!-- URL with copy -->
                     <div class="flex items-start gap-2 mb-3">
-                      <p class="text-sm font-mono truncate flex-1 pt-0.5" :title="scan.url || ''">{{ scan.url }}</p>
+                      <div class="flex-1 min-w-0 flex items-center gap-2 pt-0.5">
+                        <p class="text-sm font-mono truncate" :title="scan.url || ''">{{ scan.url }}</p>
+
+                        <!-- QR Code Tag -->
+                        <span v-if="getLinkSource(scan.url) === 'QR'"
+                          class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-500/10 text-purple-600 border border-purple-500/20 flex items-center gap-1 shrink-0"
+                          title="Found in QR Code">
+                          <QrCode class="w-3 h-3" /> QR
+                        </span>
+
+                        <!-- Hidden Tag (HTML) -->
+                        <span v-else-if="getLinkSource(scan.url) === 'HTML'"
+                          class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-500/10 text-blue-600 border border-blue-500/20 flex items-center gap-1 shrink-0"
+                          title="Found in HTML Source Code">
+                          <Code class="w-3 h-3" /> HIDDEN
+                        </span>
+
+
+
+                        <!-- Body (Plain) Tag -->
+                        <span v-else
+                          class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-500/10 text-slate-600 border border-slate-500/20 flex items-center gap-1 shrink-0"
+                          title="Found in Plain Text Body">
+                          <FileText class="w-3 h-3" /> BODY (PLAIN)
+                        </span>
+                      </div>
                       <button @click.prevent="copyTarget(index, scan.url || '')"
                         class="p-1.5 hover:bg-secondary rounded-lg transition-colors shrink-0" title="Copy URL">
                         <Copy v-if="!copiedTargets[index]" class="w-4 h-4 text-muted-foreground" />
@@ -1768,7 +1820,7 @@ const SEVERITY_FILTERS = ['ALL', 'HIGH', 'MEDIUM', 'LOW', 'INFO'] as const
                     <div class="flex-1 text-xs text-muted-foreground">
                       <span v-if="getHaResultForFile(file.sha256)?.file_type">{{
                         getHaResultForFile(file.sha256)?.file_type
-                      }}</span>
+                        }}</span>
                       <span v-if="getHaResultForFile(file.sha256)?.vx_family" class="text-destructive font-medium"> � {{
                         getHaResultForFile(file.sha256)?.vx_family }}</span>
                       <span v-if="getHaResultForFile(file.sha256)?.environment_description"> � {{
@@ -2150,7 +2202,7 @@ const SEVERITY_FILTERS = ['ALL', 'HIGH', 'MEDIUM', 'LOW', 'INFO'] as const
                               <div class="flex items-start gap-1.5 pl-4">
                                 <span class="text-foreground shrink-0">{{ key2 }}:</span>
                                 <span class="text-muted-foreground ml-1 break-all">{{ val2 === null ? 'null' : val2
-                                }}</span>
+                                  }}</span>
                               </div>
                             </template>
                           </div>
@@ -2259,12 +2311,14 @@ const SEVERITY_FILTERS = ['ALL', 'HIGH', 'MEDIUM', 'LOW', 'INFO'] as const
                                     <!-- Level 4 -->
                                     <div v-if="isJsonNodeExpanded(`raw.${key}.${key2}.${key3}`)"
                                       class="pl-4 border-l border-border/40 ml-1.5 mt-0.5">
-                                      <template v-for="(val4, key4) in (val3 as object)" :key="`raw.${key}.${key2}.${key3}.${key4}`">
+                                      <template v-for="(val4, key4) in (val3 as object)"
+                                        :key="`raw.${key}.${key2}.${key3}.${key4}`">
                                         <div class="py-0.5">
                                           <template v-if="val4 !== null && typeof val4 === 'object'">
                                             <button @click="toggleJsonNode(`raw.${key}.${key2}.${key3}.${key4}`)"
                                               class="flex items-center gap-1.5 hover:bg-muted/50 rounded px-1 -ml-1 text-left py-0.5">
-                                              <ChevronRight class="w-3 h-3 text-muted-foreground transition-transform shrink-0"
+                                              <ChevronRight
+                                                class="w-3 h-3 text-muted-foreground transition-transform shrink-0"
                                                 :class="{ 'rotate-90': isJsonNodeExpanded(`raw.${key}.${key2}.${key3}.${key4}`) }" />
                                               <span class="text-foreground">{{ key4 }}:</span>
                                               <span class="text-muted-foreground">{{ getItemLabel(val4) }}</span>
@@ -2272,26 +2326,33 @@ const SEVERITY_FILTERS = ['ALL', 'HIGH', 'MEDIUM', 'LOW', 'INFO'] as const
                                             <!-- Level 5 -->
                                             <div v-if="isJsonNodeExpanded(`raw.${key}.${key2}.${key3}.${key4}`)"
                                               class="pl-4 border-l border-border/40 ml-1.5 mt-0.5">
-                                              <template v-for="(val5, key5) in (val4 as object)" :key="`raw.${key}.${key2}.${key3}.${key4}.${key5}`">
+                                              <template v-for="(val5, key5) in (val4 as object)"
+                                                :key="`raw.${key}.${key2}.${key3}.${key4}.${key5}`">
                                                 <div class="py-0.5">
                                                   <template v-if="val5 !== null && typeof val5 === 'object'">
-                                                    <button @click="toggleJsonNode(`raw.${key}.${key2}.${key3}.${key4}.${key5}`)"
+                                                    <button
+                                                      @click="toggleJsonNode(`raw.${key}.${key2}.${key3}.${key4}.${key5}`)"
                                                       class="flex items-center gap-1.5 hover:bg-muted/50 rounded px-1 -ml-1 text-left py-0.5">
-                                                      <ChevronRight class="w-3 h-3 text-muted-foreground transition-transform shrink-0"
+                                                      <ChevronRight
+                                                        class="w-3 h-3 text-muted-foreground transition-transform shrink-0"
                                                         :class="{ 'rotate-90': isJsonNodeExpanded(`raw.${key}.${key2}.${key3}.${key4}.${key5}`) }" />
                                                       <span class="text-foreground">{{ key5 }}:</span>
-                                                      <span class="text-muted-foreground">{{ getItemLabel(val5) }}</span>
+                                                      <span class="text-muted-foreground">{{ getItemLabel(val5)
+                                                        }}</span>
                                                     </button>
                                                     <!-- Level 6+ - Show as JSON -->
-                                                    <div v-if="isJsonNodeExpanded(`raw.${key}.${key2}.${key3}.${key4}.${key5}`)"
+                                                    <div
+                                                      v-if="isJsonNodeExpanded(`raw.${key}.${key2}.${key3}.${key4}.${key5}`)"
                                                       class="pl-4 border-l border-border/40 ml-1.5 mt-0.5">
-                                                      <pre class="text-foreground whitespace-pre-wrap break-words text-xs">{{ prettyJson(val5) }}</pre>
+                                                      <pre
+                                                        class="text-foreground whitespace-pre-wrap break-words text-xs">{{ prettyJson(val5) }}</pre>
                                                     </div>
                                                   </template>
                                                   <template v-else>
                                                     <div class="flex items-start gap-1.5 pl-4">
                                                       <span class="text-foreground shrink-0">{{ key5 }}:</span>
-                                                      <span class="text-muted-foreground ml-1 break-all">{{ val5 === null ? 'null' : val5 }}</span>
+                                                      <span class="text-muted-foreground ml-1 break-all">{{ val5 ===
+                                                        null ? 'null' : val5 }}</span>
                                                     </div>
                                                   </template>
                                                 </div>
@@ -2301,7 +2362,8 @@ const SEVERITY_FILTERS = ['ALL', 'HIGH', 'MEDIUM', 'LOW', 'INFO'] as const
                                           <template v-else>
                                             <div class="flex items-start gap-1.5 pl-4">
                                               <span class="text-foreground shrink-0">{{ key4 }}:</span>
-                                              <span class="text-muted-foreground ml-1 break-all">{{ val4 === null ? 'null' : val4 }}</span>
+                                              <span class="text-muted-foreground ml-1 break-all">{{ val4 === null ?
+                                                'null' : val4 }}</span>
                                             </div>
                                           </template>
                                         </div>
@@ -2311,7 +2373,8 @@ const SEVERITY_FILTERS = ['ALL', 'HIGH', 'MEDIUM', 'LOW', 'INFO'] as const
                                   <template v-else>
                                     <div class="flex items-start gap-1.5 pl-4">
                                       <span class="text-foreground shrink-0">{{ key3 }}:</span>
-                                      <span class="text-muted-foreground ml-1 break-all">{{ val3 === null ? 'null' : val3 }}</span>
+                                      <span class="text-muted-foreground ml-1 break-all">{{ val3 === null ? 'null' :
+                                        val3 }}</span>
                                     </div>
                                   </template>
                                 </div>
@@ -2321,7 +2384,8 @@ const SEVERITY_FILTERS = ['ALL', 'HIGH', 'MEDIUM', 'LOW', 'INFO'] as const
                           <template v-else>
                             <div class="flex items-start gap-1.5 pl-4">
                               <span class="text-foreground shrink-0">{{ key2 }}:</span>
-                              <span class="text-muted-foreground ml-1 break-all">{{ val2 === null ? 'null' : val2 }}</span>
+                              <span class="text-muted-foreground ml-1 break-all">{{ val2 === null ? 'null' : val2
+                                }}</span>
                             </div>
                           </template>
                         </div>
@@ -2418,7 +2482,7 @@ const SEVERITY_FILTERS = ['ALL', 'HIGH', 'MEDIUM', 'LOW', 'INFO'] as const
                 class="py-0.5">
                 <span>id: </span>
                 <span>"{{ ((selectedRule.raw as Record<string, unknown>)['rule'] as Record<string, unknown>)['id']
-                      }}"</span>
+                }}"</span>
               </div>
               <!-- Rule Name -->
               <div v-if="((selectedRule.raw as Record<string, unknown>)['rule'] as Record<string, unknown>)?.['name']"
@@ -2450,7 +2514,7 @@ const SEVERITY_FILTERS = ['ALL', 'HIGH', 'MEDIUM', 'LOW', 'INFO'] as const
                 class="py-0.5">
                 <span>severity: </span>
                 <span>"{{ ((selectedRule.raw as Record<string, unknown>)['rule'] as Record<string, unknown>)['severity']
-                      }}"</span>
+                }}"</span>
               </div>
             </div>
             <div v-if="isRuleTreeExpanded('rule')">}</div>

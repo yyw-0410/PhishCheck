@@ -104,6 +104,7 @@ export type EmailAttachment = {
   size: number
   sha256: string
   content_id?: string | null
+  data?: string | null
 }
 
 export type EmailAddress = {
@@ -112,11 +113,18 @@ export type EmailAddress = {
   domain?: string | null
 }
 
+export type EmailLink = {
+  href: string
+  text?: string | null
+  context?: string | null
+}
+
 export type ParsedEmail = {
   from?: EmailAddress | null
   subject?: string | null
   sender_domain?: string | null
   attachments?: EmailAttachment[]
+  links?: EmailLink[]
   [key: string]: unknown
 }
 

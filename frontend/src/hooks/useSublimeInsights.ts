@@ -114,6 +114,34 @@ export function useSublimeInsights(analysisResult: Ref<CombinedAnalysisResult | 
       return 'INFO'
     }
 
+    const extractDisplayValue = (item: unknown, depth: number = 0): string | null => {
+      if (depth > 5) return null // Prevent infinite recursion
+      if (typeof item === 'string') return item
+      if (typeof item === 'number') return String(item)
+      if (item && typeof item === 'object') {
+        const obj = item as Record<string, unknown>
+
+        // Priority 1: Check specific fields at this level
+        const fields = ['url', 'value', 'name', 'email', 'domain', 'ip', 'file', 'filename', 'text', 'description', 'href', 'link', 'uri']
+        for (const field of fields) {
+          if (typeof obj[field] === 'string' && obj[field]) return obj[field] as string
+        }
+
+        // Priority 2: Recursively check values
+        for (const val of Object.values(obj)) {
+          const res = extractDisplayValue(val, depth + 1)
+          if (res) return res
+        }
+      }
+      if (Array.isArray(item)) {
+        for (const val of item) {
+          const res = extractDisplayValue(val, depth + 1)
+          if (res) return res
+        }
+      }
+      return null
+    }
+
     const summarize = (val: unknown): { text: string; extraCount: number } => {
       if (typeof val === 'boolean') return { text: val ? 'Condition matched' : 'No match', extraCount: 0 }
       if (typeof val === 'number') return { text: String(val), extraCount: 0 }
@@ -121,15 +149,26 @@ export function useSublimeInsights(analysisResult: Ref<CombinedAnalysisResult | 
         return { text: val.length > 160 ? `${val.slice(0, 157)}...` : val, extraCount: 0 }
       }
       if (Array.isArray(val)) {
-        const strings = val.filter((item) => typeof item === 'string') as string[]
+        // Try to extract string representation from each item
+        const strings = val
+          .map(item => extractDisplayValue(item))
+          .filter((s): s is string => typeof s === 'string' && s.length > 0)
+
         if (strings.length) {
           const head = strings.slice(0, 5)
           const extra = Math.max(0, strings.length - head.length)
           return { text: head.join(', '), extraCount: extra }
         }
-        return { text: `List of ${val.length} items`, extraCount: 0 }
+        return { text: '\u00A0', extraCount: 0 }
       }
       if (val && typeof val === 'object') {
+        // First try to extract a single display value
+        const displayVal = extractDisplayValue(val)
+        if (displayVal) {
+          return { text: displayVal, extraCount: 0 }
+        }
+
+        // Fallback to field listing
         const keys = Object.keys(val as Record<string, unknown>)
         const head = keys.slice(0, 5)
         const extra = Math.max(0, keys.length - head.length)

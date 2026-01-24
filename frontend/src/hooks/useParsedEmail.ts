@@ -19,7 +19,7 @@ export function useParsedEmail(analysisResult: Ref<CombinedAnalysisResult | null
       // Extract file extension
       const filename = attachment.filename || 'Unnamed attachment'
       const ext = filename.includes('.') ? filename.split('.').pop()?.toLowerCase() : null
-      
+
       // Determine file category based on MIME type
       const mimeType = attachment.content_type || 'application/octet-stream'
       let fileCategory = 'Unknown'
@@ -34,11 +34,11 @@ export function useParsedEmail(analysisResult: Ref<CombinedAnalysisResult | null
       else if (mimeType.includes('zip') || mimeType.includes('compressed') || mimeType.includes('archive')) fileCategory = 'Archive'
       else if (mimeType.includes('executable') || ext === 'exe' || ext === 'msi') fileCategory = 'Executable'
       else if (mimeType.includes('script') || ext === 'js' || ext === 'vbs' || ext === 'ps1') fileCategory = 'Script'
-      
+
       // Check for potentially dangerous extensions
       const dangerousExts = ['exe', 'msi', 'bat', 'cmd', 'ps1', 'vbs', 'js', 'jar', 'scr', 'pif', 'com', 'dll', 'hta', 'iso', 'img']
       const isDangerous = ext ? dangerousExts.includes(ext) : false
-      
+
       return {
         filename,
         sizeLabel: formatBytes(attachment.size),
@@ -63,10 +63,10 @@ export function useParsedEmail(analysisResult: Ref<CombinedAnalysisResult | null
   const senderDetails = computed(() => {
     const parsed = analysisResult.value?.parsed_email
     if (!parsed) return null
-    
+
     const from = parsed.from as any
     const replyTo = parsed.reply_to as any
-    
+
     return {
       displayName: from?.name || from?.display_name || null,
       email: from?.email || from?.address || (typeof parsed.from === 'string' ? parsed.from : null),
@@ -79,7 +79,7 @@ export function useParsedEmail(analysisResult: Ref<CombinedAnalysisResult | null
   const emailContent = computed(() => {
     const parsed = analysisResult.value?.parsed_email
     if (!parsed) return null
-    
+
     // Helper to format recipient list
     const formatRecipients = (recipients: unknown): string | null => {
       if (!recipients) return null
@@ -92,10 +92,10 @@ export function useParsedEmail(analysisResult: Ref<CombinedAnalysisResult | null
       }
       return typeof recipients === 'string' ? recipients : null
     }
-    
+
     return {
       subject: parsed.subject as string || 'No Subject',
-      to: Array.isArray(parsed.to) 
+      to: Array.isArray(parsed.to)
         ? (parsed.to as any[]).map(t => t.email || t.address || t).join(', ')
         : (parsed.to as any)?.email || parsed.to as string || 'Unknown',
       cc: formatRecipients(parsed.cc),
@@ -138,6 +138,27 @@ export function useParsedEmail(analysisResult: Ref<CombinedAnalysisResult | null
     return raw?.data_model || null
   })
 
+  // Processed HTML body with inline images (CID) replaced by base64 data
+  const processedHtmlBody = computed(() => {
+    const rawHtml = rawHtmlBody.value
+    if (!rawHtml) return ''
+
+    const attachments = (analysisResult.value?.parsed_email?.attachments ?? []) as EmailAttachment[]
+    if (!attachments.length) return rawHtml
+
+    let processed = rawHtml
+    for (const att of attachments) {
+      if (att.content_id && att.data && att.content_type?.startsWith('image/')) {
+        // Remove angle brackets from Content-ID if present
+        const cleanCid = att.content_id.replace(/^<|>$/g, '')
+        // Replace all occurrences of cid:content_id
+        const cidRegex = new RegExp(`cid:${cleanCid}`, 'gi')
+        processed = processed.replace(cidRegex, `data:${att.content_type};base64,${att.data}`)
+      }
+    }
+    return processed
+  })
+
   const emailHeaders = computed(() => {
     const parsed = analysisResult.value?.parsed_email
     if (!parsed) return []
@@ -153,5 +174,6 @@ export function useParsedEmail(analysisResult: Ref<CombinedAnalysisResult | null
     rawEmlContent,
     mdmData,
     emailHeaders,
+    processedHtmlBody,
   }
 }
