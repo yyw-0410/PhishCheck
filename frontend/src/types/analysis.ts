@@ -18,6 +18,7 @@ export type UrlscanSubmission = {
   visibility?: string | null
   verdict?: string | null
   error?: string | null
+  tags?: string[] | null
   ml_link?: UrlscanMlLink | null
 }
 

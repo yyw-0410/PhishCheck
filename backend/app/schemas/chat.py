@@ -77,9 +77,14 @@ class AnalysisRecommendationRequest(BaseModel):
     # URLScan threat intel
     urlscan_verdict: Optional[str] = Field(None, description="URLScan verdict: malicious, suspicious, safe")
     urlscan_tags: Optional[List[str]] = Field(None, description="URLScan tags: phishing, malware, etc.")
+    urlscan_malicious_count: Optional[int] = Field(None, description="Number of malicious URLs found by URLscan")
+    urlscan_suspicious_count: Optional[int] = Field(None, description="Number of suspicious URLs found by URLscan")
+    
     # Hybrid Analysis threat intel
     ha_max_threat_score: Optional[int] = Field(None, description="Highest Hybrid Analysis threat score (0-100)")
     ha_verdict: Optional[str] = Field(None, description="Hybrid Analysis verdict: malicious, suspicious, no_threat")
+    ha_malicious_count: Optional[int] = Field(None, description="Number of malicious files found by Hybrid Analysis")
+    ha_suspicious_count: Optional[int] = Field(None, description="Number of suspicious files found by Hybrid Analysis")
 
 
 class AnalysisRecommendationResponse(BaseModel):

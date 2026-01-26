@@ -183,26 +183,57 @@ export const useAnalysisStore = defineStore('analysis', () => {
             }
             const uniqueIpqsFlags = [...new Set(ipqsFlags)]
 
-            // Extract URLScan data (aggregated)
+            // Extract URLScan data (aggregated - prioritizing worst verdict AND counting)
             let urlscanVerdict: string | null = null
+            let urlscanMaliciousCount = 0
+            let urlscanSuspiciousCount = 0
             const urlscanTags: string[] = []
+
             if (result.threat_intel?.urlscan?.length) {
                 for (const us of result.threat_intel.urlscan) {
-                    if (us.verdict) urlscanVerdict = us.verdict
+                    const currentV = us.verdict?.toLowerCase()
+
+                    if (currentV === 'malicious') {
+                        urlscanMaliciousCount++
+                        urlscanVerdict = 'malicious'
+                    } else if (currentV === 'suspicious') {
+                        urlscanSuspiciousCount++
+                        if (urlscanVerdict !== 'malicious') {
+                            urlscanVerdict = 'suspicious'
+                        }
+                    } else if (currentV && !urlscanVerdict) {
+                        urlscanVerdict = currentV
+                    }
+
                     if (us.tags) urlscanTags.push(...us.tags)
                 }
             }
             const uniqueUrlscanTags = [...new Set(urlscanTags)]
 
-            // Extract Hybrid Analysis data (aggregated)
+            // Extract Hybrid Analysis data (aggregated - prioritizing worst verdict AND counting)
             let haMaxThreatScore: number | null = null
             let haVerdict: string | null = null
+            let haMaliciousCount = 0
+            let haSuspiciousCount = 0
+
             if (result.threat_intel?.hybrid_analysis?.length) {
                 for (const ha of result.threat_intel.hybrid_analysis) {
                     if (ha.threat_score != null && (haMaxThreatScore === null || ha.threat_score > haMaxThreatScore)) {
                         haMaxThreatScore = ha.threat_score
                     }
-                    if (ha.verdict) haVerdict = ha.verdict
+
+                    const currentV = ha.verdict?.toLowerCase()
+                    if (currentV === 'malicious') {
+                        haMaliciousCount++
+                        haVerdict = 'malicious'
+                    } else if (currentV === 'suspicious') {
+                        haSuspiciousCount++
+                        if (haVerdict !== 'malicious') {
+                            haVerdict = 'suspicious'
+                        }
+                    } else if (currentV && !haVerdict) {
+                        haVerdict = currentV
+                    }
                 }
             }
 
@@ -226,11 +257,14 @@ export const useAnalysisStore = defineStore('analysis', () => {
                     ipqs_flags: uniqueIpqsFlags.length > 0 ? uniqueIpqsFlags : null,
                     urlscan_verdict: urlscanVerdict,
                     urlscan_tags: uniqueUrlscanTags.length > 0 ? uniqueUrlscanTags : null,
+                    urlscan_malicious_count: urlscanMaliciousCount,
+                    urlscan_suspicious_count: urlscanSuspiciousCount,
                     ha_max_threat_score: haMaxThreatScore,
-                    ha_verdict: haVerdict
+                    ha_verdict: haVerdict,
+                    ha_malicious_count: haMaliciousCount,
+                    ha_suspicious_count: haSuspiciousCount
                 })
             })
-
             if (response.ok) {
                 aiRecommendation.value = await response.json()
             }

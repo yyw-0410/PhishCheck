@@ -341,8 +341,28 @@ IMPORTANT: When assessing email safety:
         # Attack score
         if analysis_context.get("attackScore") is not None:
             context_text += f"\n### Overall Attack Score: {analysis_context['attackScore']}/100\n"
-        
-        # Verdict
+
+        # URLscan summary
+        if analysis_context.get("urlscanSummary"):
+            us = analysis_context["urlscanSummary"]
+            context_text += f"\n### URLscan.io Summary:\n"
+            context_text += f"- Max Malicious Verdicts: {us.get('maliciousCount', 0)}\n"
+            context_text += f"- Max Suspicious Verdicts: {us.get('suspiciousCount', 0)}\n"
+            if us.get('tags'):
+                context_text += f"- Tags: {', '.join(us.get('tags'))}\n"
+            if us.get('brands'):
+                context_text += f"- Targeted Brands: {', '.join(us.get('brands'))}\n"
+
+        # Hybrid Analysis summary
+        if analysis_context.get("hybridAnalysisSummary"):
+            ha = analysis_context["hybridAnalysisSummary"]
+            context_text += f"\n### Hybrid Analysis (Sandbox) Summary:\n"
+            context_text += f"- Max Malicious Verdicts: {ha.get('maliciousCount', 0)}\n"
+            context_text += f"- Max Suspicious Verdicts: {ha.get('suspiciousCount', 0)}\n"
+            if ha.get('maxThreatScore') is not None:
+                context_text += f"- Max Threat Score: {ha.get('maxThreatScore')}/100\n"
+            if ha.get('families'):
+                context_text += f"- Detected Malware Families: {', '.join(ha.get('families'))}\n"
         if analysis_context.get("verdict"):
             context_text += f"\n### Analysis Verdict: {analysis_context['verdict']}\n"
         

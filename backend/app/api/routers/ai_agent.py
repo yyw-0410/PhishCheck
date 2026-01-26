@@ -126,8 +126,8 @@ async def get_analysis_recommendation(request: AnalysisRecommendationRequest):
     rules = request.rule_count or 0
     verdict = (request.verdict or "").lower()
     
-    # Determine risk level based ONLY on attack score (ML analysis is primary)
-    # Threat intel (VT, IPQS, etc.) is enrichment data, not risk driver
+    # Determine risk level based on attack score (ML analysis)
+    # 1. Primary Calculator: Sublime ML Score
     if score >= 70:
         risk_level = "critical"
     elif score >= 40:
@@ -136,6 +136,37 @@ async def get_analysis_recommendation(request: AnalysisRecommendationRequest):
         risk_level = "medium"
     else:
         risk_level = "low"
+
+    # 2. Fallback Logic (ONLY runs if Primary Score is MISSING/None)
+    # Different from 0 (Safe). None means analysis failed/not run.
+    if request.attack_score is None:
+        # Use "Max Risk" strategy - check all sources and keep the highest risk found
+        
+        # Check Hybrid Analysis (Sandbox Behavior) - highest confidence
+        if request.ha_verdict and request.ha_verdict.lower() == 'malicious':
+            risk_level = "critical"
+        
+        # Check VirusTotal (Malware/Phishing) - high confidence if multiple engines
+        if vt_mal >= 3:
+            risk_level = "critical"
+        elif vt_mal >= 2 and risk_level != "critical":
+            risk_level = "high"
+            
+        # Check URLscan.io (Visual Phishing)
+        if request.urlscan_verdict and request.urlscan_verdict.lower() == 'malicious' and risk_level != "critical":
+            risk_level = "high"
+            
+        # Check IPQS (Infrastructure Reputation)
+        if request.ipqs_max_fraud_score and request.ipqs_max_fraud_score >= 90 and risk_level != "critical":
+            risk_level = "high"
+        elif request.ipqs_max_fraud_score and request.ipqs_max_fraud_score >= 75 and risk_level not in ["critical", "high"]:
+             risk_level = "medium"
+             
+        # Check Hybrid Analysis suspicious (if not already higher)
+        if request.ha_verdict and request.ha_verdict.lower() == 'suspicious' and risk_level not in ["critical", "high"]:
+            risk_level = "medium"
+
+    # Single detection or low scores stay "low" in fallback to avoid False Positives
     
     # Try AI-powered recommendation with key rotation on 429
     api_keys = [

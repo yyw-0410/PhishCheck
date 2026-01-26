@@ -303,6 +303,34 @@ export const useChatStore = defineStore('chat', () => {
       }
     }
 
+    // URLscan results (summary)
+    if (result.threat_intel?.urlscan?.length) {
+      const urlscanData = result.threat_intel.urlscan
+      context.urlscanSummary = {
+        total: urlscanData.length,
+        maliciousCount: urlscanData.filter((s: any) => s.verdict === 'malicious').length,
+        suspiciousCount: urlscanData.filter((s: any) => s.verdict === 'suspicious').length,
+        // Collect all unique tags
+        tags: [...new Set(urlscanData.flatMap((s: any) => s.tags || []))].slice(0, 10),
+        // Collect major brands targeted
+        brands: [...new Set(urlscanData.flatMap((s: any) => s.brand_name ? [s.brand_name] : []))].slice(0, 5)
+      }
+    }
+
+    // Hybrid Analysis results (summary)
+    if (result.threat_intel?.hybrid_analysis?.length) {
+      const haData = result.threat_intel.hybrid_analysis
+      context.hybridAnalysisSummary = {
+        total: haData.length,
+        maliciousCount: haData.filter((h: any) => h.verdict === 'malicious').length,
+        suspiciousCount: haData.filter((h: any) => h.verdict === 'suspicious').length,
+        // Collect malware families
+        families: [...new Set(haData.map((h: any) => h.vx_family).filter(Boolean))].slice(0, 5),
+        // Max threat score found
+        maxThreatScore: Math.max(...haData.map((h: any) => h.threat_score || 0))
+      }
+    }
+
     return context
   }
 
